@@ -1,0 +1,277 @@
+{
+  "intents": [
+    {
+      "tag": "greet",
+      "patterns": [
+        "hello",
+        "hi",
+        "hey",
+        "good morning",
+        "good evening",
+        "good afternoon",
+        "namaste",
+        "hii",
+        "yo",
+        "hello there",
+        "hi bot",
+        "hey bot",
+        "kaise ho",
+        "kya haal hai",
+        "salaam",
+        "good night"
+      ],
+      "responses": [
+        "Hello! I am your Student AI Assistant. Type /help to see what I can do.",
+        "Hi there! Ready to study? Ask me a question or type /quiz to practice."
+      ]
+    },
+    {
+      "tag": "ask",
+      "patterns": [
+        "what can you do",
+        "what do you do",
+        "help me with my studies",
+        "tell me about yourself",
+        "who are you",
+        "what are your features",
+        "can you help me",
+        "what should i ask",
+        "mujhe kya aata hai",
+        "kya kar sakte ho",
+        "introduce yourself",
+        "how do you work",
+        "are you an ai",
+        "are you a chatbot",
+        "kaam kya hai tumhara"
+      ],
+      "responses": [
+        "I am a Student AI Assistant. I can answer study questions, explain programming, run quizzes (/quiz), build study plans (/planner) and more.",
+        "I help students with Python, math, science, assignments and exam prep. Try /quiz or ask me anything!"
+      ]
+    },
+    {
+      "tag": "quiz",
+      "patterns": [
+        "start a quiz",
+        "quiz",
+        "quiz start karo",
+        "give me a quiz",
+        "i want to take a quiz",
+        "lets play quiz",
+        "test my knowledge",
+        "practice questions",
+        "mcq quiz",
+        "quiz khelna hai",
+        "start quiz",
+        "can we do a quiz",
+        "quiz do",
+        "some quiz questions"
+      ],
+      "responses": [
+        "Great! Starting the quiz. Type /quiz to begin.",
+        "Sure, let's practice! Type /quiz to start a quiz."
+      ]
+    },
+    {
+      "tag": "planner",
+      "patterns": [
+        "create a study plan",
+        "study plan",
+        "planner",
+        "make a timetable",
+        "plan my studies",
+        "schedule my study hours",
+        "study plan banao",
+        "timetable bana do",
+        "planner kholo",
+        "help me plan",
+        "how to plan my day",
+        "routine banao",
+        "study schedule",
+        "plan bana do"
+      ],
+      "responses": [
+        "Type /planner and I will build a custom study schedule for you.",
+        "Sure! Use the /planner command to generate a day-wise study plan."
+      ]
+    },
+    {
+      "tag": "code",
+      "patterns": [
+        "how do i learn python",
+        "python kya hai",
+        "mujhe python sikhao",
+        "write a program",
+        "explain this code",
+        "what is a function in python",
+        "difference between list and tuple",
+        "how to debug my code",
+        "code error aa raha hai",
+        "programming kaise sikhe",
+        "what is oop",
+        "explain recursion",
+        "how to use loops",
+        "what is a variable",
+        "java vs python",
+        "how to start coding",
+        "coding kaise start karu",
+        "html kya hota hai",
+        "css kaise seekhe",
+        "javascript kya hai"
+      ],
+      "responses": [
+        "Let's look at the code together. Ask me about Python, HTML, CSS, JavaScript or any programming concept.",
+        "Programming query received. I can explain concepts, fix errors and suggest examples."
+      ]
+    },
+    {
+      "tag": "study",
+      "patterns": [
+        "how to study effectively",
+        "study tips",
+        "how to focus on studies",
+        "how to memorize faster",
+        "i am losing concentration",
+        "padhai kaise karu",
+        "how to revise",
+        "best way to learn",
+        "how to take notes",
+        "exam preparation tips",
+        "how to avoid distraction while studying",
+        "study motivation chahiye",
+        "how many hours should i study",
+        "concentration badhane ke tips",
+        "kaise padhai karu"
+      ],
+      "responses": [
+        "Here are study techniques: spaced repetition, active recall, short breaks and a fixed daily schedule.",
+        "Focus on understanding rather than rote learning, revise regularly and take timed practice tests."
+      ]
+    },
+    {
+      "tag": "math",
+      "patterns": [
+        "solve this math problem",
+        "what is derivative",
+        "explain quadratic equation",
+        "math help",
+        "how to do algebra",
+        "what is integration",
+        "probability kya hai",
+        "geometry formulas",
+        "trigonometry basics",
+        "maths kaise solve karu",
+        "what is a matrix",
+        "explain pythagoras theorem",
+        "percentage calculation",
+        "statistics explained"
+      ],
+      "responses": [
+        "Send me the math problem and I will solve it step by step.",
+        "Maths time! Ask about algebra, calculus, geometry, probability or statistics."
+      ]
+    },
+    {
+      "tag": "science",
+      "patterns": [
+        "explain photosynthesis",
+        "what is gravity",
+        "how does electricity work",
+        "chemistry basics",
+        "physics doubt",
+        "science question",
+        "what is newton's law",
+        "explain the water cycle",
+        "cell kya hota hai",
+        "why is sky blue",
+        "explain atom",
+        "biology padhna hai",
+        "laws of motion",
+        "what is force"
+      ],
+      "responses": [
+        "Let's break the science concept down into simple parts.",
+        "Science question noted. Physics, chemistry or biology - ask away!"
+      ]
+    },
+    {
+      "tag": "help",
+      "patterns": [
+        "help",
+        "/help",
+        "commands",
+        "what commands are available",
+        "show menu",
+        "options",
+        "how to use this bot",
+        "madad karo",
+        "kya commands hain",
+        "guide me",
+        "kaise use karu"
+      ],
+      "responses": [
+        "Type /help to see the full command list.",
+        "Sure - here is the help menu."
+      ]
+    },
+    {
+      "tag": "thanks",
+      "patterns": [
+        "thanks",
+        "thank you",
+        "dhanyavad",
+        "shukriya",
+        "ok thanks",
+        "great thanks",
+        "thank you so much",
+        "bohot accha",
+        "thanks a lot"
+      ],
+      "responses": [
+        "You're welcome! Keep learning.",
+        "Happy to help. Ask me anything else!"
+      ]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": [
+        "bye",
+        "goodbye",
+        "see you",
+        "exit",
+        "quit",
+        "good night",
+        "chalta hoon",
+        "bye bye",
+        "see you later",
+        "i am leaving",
+        "khatam karte hain"
+      ],
+      "responses": [
+        "Goodbye! Keep learning and keep building.",
+        "See you soon. Happy studying!"
+      ]
+    },
+    {
+      "tag": "fallback",
+      "patterns": [
+        "asdfgh",
+        "???",
+        "what",
+        "huh",
+        "idk",
+        "tell me a joke",
+        "random text here",
+        "lorem ipsum",
+        "asdf",
+        "blah blah",
+        "12345",
+        "xyz"
+      ],
+      "responses": [
+        "I didn't quite get that. Try /help to see my commands, or ask a study question.",
+        "Not sure I understood. Rephrase the question or type /help."
+      ]
+    }
+  ]
+}

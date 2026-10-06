@@ -1,0 +1,1079 @@
+{
+  "knowledge_base": [
+    {
+      "question": "What is Python?",
+      "answer": "Python is a high-level, interpreted programming language known for its simple, readable syntax. It supports multiple paradigms (object-oriented, functional, procedural) and is widely used for web development, data science, automation, AI and scripting.",
+      "intent": "code"
+    },
+    {
+      "question": "python kya hai",
+      "answer": "Python ek simple aur readable syntax wali high-level programming language hai. Isse web development, data science, automation aur AI mein use kiya jata hai. `print('Hello')` se aap apna pehla program likh sakte ho.",
+      "intent": "code"
+    },
+    {
+      "question": "How do I learn Python as a beginner?",
+      "answer": "Start with variables, data types and print statements, then learn conditionals (if/else), loops, functions, lists/dictionaries, and finally files and small projects. Practice daily on small problems and build a mini project like a calculator or to-do app.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a list and a tuple in Python?",
+      "answer": "Lists are mutable (you can change elements after creation) and use square brackets [ ]. Tuples are immutable (cannot be changed) and use parentheses ( ). Use lists for data that changes and tuples for fixed records.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a function in Python?",
+      "answer": "A function is a reusable block of code that performs a specific task. Define it with `def`, optionally accept parameters, and return a value with `return`. Functions make code organized, reusable and easier to test.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a dictionary in Python?",
+      "answer": "A dictionary is a collection of key-value pairs written with curly braces: `{'name': 'Ravi', 'age': 20}`. Values are accessed by key in O(1) time, which makes dictionaries ideal for fast lookups.",
+      "intent": "code"
+    },
+    {
+      "question": "What is OOP in Python?",
+      "answer": "Object-Oriented Programming organizes code into classes and objects. The four main pillars are encapsulation, inheritance, polymorphism and abstraction. In Python you define a class with `class ClassName:` and create objects from it.",
+      "intent": "code"
+    },
+    {
+      "question": "Explain recursion with an example",
+      "answer": "Recursion is when a function calls itself to solve a smaller part of a problem, with a base case that stops the recursion. Example: factorial of n is `n * factorial(n-1)` with `factorial(0) = 1`.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a deep copy and a shallow copy?",
+      "answer": "A shallow copy creates a new container but references the same inner objects, so changes to nested objects affect both copies. A deep copy recursively duplicates nested objects, giving a fully independent clone. Use `copy.deepcopy()` for a deep copy.",
+      "intent": "code"
+    },
+    {
+      "question": "What are decorators in Python?",
+      "answer": "A decorator is a function that wraps another function to add behaviour without changing its code. You use `@decorator_name` above a function definition. Common uses: logging, timing, authentication and caching.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between == and is in Python?",
+      "answer": "`==` compares values (are the two objects equal?), while `is` compares identity (are they the exact same object in memory). Use `is` for checking None or identity, and `==` for normal value comparison.",
+      "intent": "code"
+    },
+    {
+      "question": "How do I handle errors in Python?",
+      "answer": "Use try/except blocks: put risky code in `try` and handle failures in `except ExceptionType`. You can also use `else`, `finally`, and raise custom exceptions. Always catch specific exceptions instead of bare `except:`.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a list comprehension?",
+      "answer": "List comprehensions create lists in a single readable line: `[x*2 for x in range(5)]` produces `[0, 2, 4, 6, 8]`. You can add conditions: `[x for x in nums if x > 0]`. They are usually faster than a for loop with append.",
+      "intent": "code"
+    },
+    {
+      "question": "How do I read a file in Python?",
+      "answer": "Use `with open('file.txt', 'r') as f: content = f.read()`. The `with` statement closes the file automatically. Modes: 'r' read, 'w' write (overwrites), 'a' append.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a module and a package?",
+      "answer": "A module is a single .py file containing code. A package is a folder of modules with an `__init__.py`, allowing organised, hierarchical imports. Both are imported with the `import` statement.",
+      "intent": "code"
+    },
+    {
+      "question": "What are Python generators?",
+      "answer": "Generators produce values one at a time using `yield` instead of returning a whole list. They are memory efficient for large data because they don't store everything in memory. Example: `(x for x in range(1000000))`.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a set and a list?",
+      "answer": "Lists keep duplicates and maintain insertion order; sets store unique values with no order and give O(1) membership tests. Use sets to remove duplicates or check membership quickly.",
+      "intent": "code"
+    },
+    {
+      "question": "How do I install packages in Python?",
+      "answer": "Use pip: `pip install package_name`. Inside a virtual environment (`python -m venv .venv`) this keeps projects isolated. Use `pip list` to see installed packages and `pip freeze > requirements.txt` to save them.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a virtual environment in Python?",
+      "answer": "A virtual environment is an isolated Python environment with its own installed packages. Create one with `python -m venv .venv` and activate it (Windows: `.venv\\Scripts\\activate`). It prevents dependency conflicts between projects.",
+      "intent": "code"
+    },
+    {
+      "question": "What are args and kwargs?",
+      "answer": "`*args` collects extra positional arguments into a tuple, `**kwargs` collects extra keyword arguments into a dictionary. They let a function accept a flexible number of arguments.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a variable in programming?",
+      "answer": "A variable is a named storage location in memory that holds a value which can change while the program runs. In Python you simply assign: `age = 20`. Good variables use clear, lowercase names.",
+      "intent": "code"
+    },
+    {
+      "question": "What is an algorithm?",
+      "answer": "An algorithm is a finite, step-by-step procedure for solving a problem. Good algorithms are clear, correct and efficient. Efficiency is measured with time complexity (Big O) and space complexity.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a compiler and an interpreter?",
+      "answer": "A compiler translates the whole program into machine code before running it (e.g. C, C++). An interpreter executes the code line by line (e.g. Python, JavaScript). Some languages use both approaches.",
+      "intent": "code"
+    },
+    {
+      "question": "What is Big O notation?",
+      "answer": "Big O describes how an algorithm's running time grows as input size increases. Examples: O(1) constant, O(log n) logarithmic, O(n) linear, O(n²) quadratic. Prefer the lowest complexity for large inputs.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a stack and a queue?",
+      "answer": "A stack is LIFO (last in, first out) - like a stack of plates. A queue is FIFO (first in, first out) - like a queue at a shop. Stacks are used for function calls and undo history; queues for tasks and buffering.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a linked list?",
+      "answer": "A linked list stores elements in nodes where each node holds data and a pointer to the next node. Insertion/deletion is O(1) once you have the position, but random access is O(n) unlike arrays.",
+      "intent": "code"
+    },
+    {
+      "question": "What is HTML?",
+      "answer": "HTML (HyperText Markup Language) is the standard markup language for building web pages. It uses tags like `<h1>`, `<p>`, `<a>` and `<img>` to structure content. HTML alone provides structure; CSS styles it and JavaScript adds behaviour.",
+      "intent": "code"
+    },
+    {
+      "question": "html kya hota hai",
+      "answer": "HTML ka full form HyperText Markup Language hai. Ye web pages banane ke liye use hota hai. Tags jaise `<h1>`, `<p>`, `<a>` content ko structure dete hain. CSS styling ke liye aur JavaScript behaviour ke liye use hoti hai.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between HTML and XML?",
+      "answer": "HTML is designed to display data with predefined tags like `<p>` and `<h1>`. XML is designed to store and transport data with user-defined tags and is stricter (all tags must be closed and nested correctly).",
+      "intent": "code"
+    },
+    {
+      "question": "What is semantic HTML?",
+      "answer": "Semantic HTML uses tags that describe the meaning of content: `<header>`, `<nav>`, `<main>`, `<article>`, `<footer>`. It improves accessibility, SEO and code readability compared to using `<div>` everywhere.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between an ID and a class in HTML?",
+      "answer": "An `id` is unique and can be used only once per page; a `class` can be repeated on many elements. CSS targets them with `#id` and `.class`. Use classes for reusable styles and IDs for unique elements or JavaScript hooks.",
+      "intent": "code"
+    },
+    {
+      "question": "What are HTML forms used for?",
+      "answer": "Forms collect user input and send it to a server. They use `<form>` with inputs like `<input type=\"text\">`, `<textarea>`, `<select>` and a submit button. The `action` attribute defines the URL and `method` is usually GET or POST.",
+      "intent": "code"
+    },
+    {
+      "question": "What is CSS?",
+      "answer": "CSS (Cascading Style Sheets) controls the visual presentation of HTML - colours, fonts, spacing and layout. Selectors target elements and rules set properties, e.g. `p { color: blue; }`. CSS can be inline, internal or in an external .css file.",
+      "intent": "code"
+    },
+    {
+      "question": "css kaise seekhe",
+      "answer": "CSS seekhne ka best tareeka: pehle selectors (element, class, id) samjho, phir box model (margin, padding, border), uske baad Flexbox aur Grid for layout, aur last me media queries for responsive design. Har concept ka chhota example khud likho.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between Flexbox and Grid?",
+      "answer": "Flexbox lays out items in one dimension (row OR column) and is great for navigation bars and aligning items. CSS Grid works in two dimensions (rows AND columns) and is ideal for page layouts. Use Grid for structure, Flexbox for alignment within it.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the CSS box model?",
+      "answer": "Every element is a box made of content, padding, border and margin. Padding is space inside the border, margin is space outside. `box-sizing: border-box` makes width include padding and border, which is easier to reason about.",
+      "intent": "code"
+    },
+    {
+      "question": "What is responsive design?",
+      "answer": "Responsive design makes a website adapt to any screen size. Key techniques: relative units (%, rem), Flexbox/Grid layouts, media queries (`@media (max-width: 768px)`) and responsive images. Always test on mobile and desktop widths.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between inline, internal and external CSS?",
+      "answer": "Inline CSS is written in the `style` attribute on an element (hard to maintain). Internal CSS lives in a `<style>` block in the HTML head. External CSS is a separate .css file linked with `<link>` - the best choice for maintainability and caching.",
+      "intent": "code"
+    },
+    {
+      "question": "What is JavaScript?",
+      "answer": "JavaScript is the programming language of the web. It adds interactivity to pages - form validation, animations, dynamic content and API calls. Modern JavaScript runs in the browser (ES6+) and on servers via Node.js.",
+      "intent": "code"
+    },
+    {
+      "question": "javascript kya hai",
+      "answer": "JavaScript web ki programming language hai jo pages ko interactive banati hai - buttons, form validation, animations aur dynamic content ke liye. Browser ke alawa Node.js se server-side bhi chalti hai.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between var, let and const?",
+      "answer": "`var` is function-scoped and hoisted, so it can cause surprises. `let` is block-scoped and reassignable. `const` is block-scoped and cannot be reassigned (though objects can still be mutated). Prefer `const` by default, `let` when reassignment is needed.",
+      "intent": "code"
+    },
+    {
+      "question": "What is an event listener in JavaScript?",
+      "answer": "An event listener runs a function when something happens, like a click. Example: `button.addEventListener('click', () => alert('hi'))`. Common events: click, submit, keydown, input, load.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between == and === in JavaScript?",
+      "answer": "`==` compares values after converting types (so `'5' == 5` is true), while `===` compares both value and type strictly (`'5' === 5` is false). Always prefer `===` to avoid unexpected type coercion.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the DOM?",
+      "answer": "The Document Object Model is the browser's object representation of the HTML page. JavaScript uses it to read and modify content: `document.getElementById('title').textContent = 'Hi';` Events and DOM manipulation make pages interactive.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between null and undefined in JavaScript?",
+      "answer": "`undefined` means a variable has been declared but has no assigned value (or a function returned nothing). `null` is an intentional assignment meaning 'no value'. Check with `x === undefined` and `x === null`.",
+      "intent": "code"
+    },
+    {
+      "question": "What is an asynchronous function in JavaScript?",
+      "answer": "Asynchronous code runs without blocking other tasks. Use `async/await` with Promises: `const data = await fetch(url)`. This lets the page stay responsive while waiting for network requests or timers.",
+      "intent": "code"
+    },
+    {
+      "question": "What is an API?",
+      "answer": "An Application Programming Interface is a defined way for programs to talk to each other. Web APIs usually expose URLs that accept HTTP requests (GET, POST, PUT, DELETE) and return JSON data.",
+      "intent": "code"
+    },
+    {
+      "question": "What is Git?",
+      "answer": "Git is a distributed version control system that tracks changes in your code. Basic commands: `git init`, `git add`, `git commit -m \"msg\"`, `git status`, `git log`. It lets you save snapshots, revert mistakes and collaborate safely.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between Git and GitHub?",
+      "answer": "Git is the version control tool that runs on your computer. GitHub is an online platform that hosts Git repositories and adds collaboration features like pull requests, issues and code review.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a Git branch?",
+      "answer": "A branch is an independent line of development. Create one with `git branch feature-x` or `git checkout -b feature-x`, work on it, then merge it back with `git merge feature-x`. Branches keep experimental work separate from the main code.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a merge conflict and how do I resolve it?",
+      "answer": "A merge conflict happens when two branches change the same lines. Git marks the file with `<<<<<<<` and `>>>>>>>` sections. Edit the file to keep the correct code, remove the markers, then `git add file` and `git commit`.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a pull request?",
+      "answer": "A pull request (PR) proposes that your branch's changes be merged into the main repository. It lets teammates review the code, discuss changes and run automated checks before merging.",
+      "intent": "code"
+    },
+    {
+      "question": "What is git clone and git fork?",
+      "answer": "`git clone` copies a repository to your local machine. `fork` creates your own copy of someone else's repository on GitHub so you can experiment and later open a pull request to the original project.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between git pull and git fetch?",
+      "answer": "`git fetch` downloads new commits from the remote but does not change your local files. `git pull` fetches AND merges into your current branch. Use fetch to inspect changes first, pull when you are ready to integrate.",
+      "intent": "code"
+    },
+    {
+      "question": "What is .gitignore used for?",
+      "answer": ".gitignore lists files and folders Git should never track - like `.env`, `__pycache__/`, `node_modules/` and build outputs. This keeps secrets and large generated files out of your repository.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a database?",
+      "answer": "A database is an organised collection of data stored so it can be easily accessed, updated and managed. Relational databases store data in tables with rows and columns; non-relational databases store documents, key-value pairs or graphs.",
+      "intent": "code"
+    },
+    {
+      "question": "What is SQL?",
+      "answer": "SQL (Structured Query Language) is used to create and query relational databases. Core statements: `SELECT` (read), `INSERT` (add), `UPDATE` (modify), `DELETE` (remove), `CREATE TABLE` (schema). Example: `SELECT name FROM students WHERE marks > 50;`",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between SQL and NoSQL?",
+      "answer": "SQL databases (MySQL, PostgreSQL) are structured, use tables and are strong for complex queries and transactions. NoSQL databases (MongoDB, Redis) are flexible schema, scale horizontally and suit unstructured or rapidly changing data.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a primary key?",
+      "answer": "A primary key is a column (or set of columns) that uniquely identifies each row in a table. It cannot be NULL and must be unique, which makes it the anchor for joins and lookups.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a foreign key?",
+      "answer": "A foreign key is a column in one table that references the primary key of another table. It enforces referential integrity, preventing rows that point to non-existent records.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between DELETE, DROP and TRUNCATE?",
+      "answer": "`DELETE` removes specific rows and can be filtered with WHERE (and rolled back). `TRUNCATE` removes all rows quickly without row-level logging. `DROP` deletes the entire table structure itself.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a JOIN in SQL?",
+      "answer": "A JOIN combines rows from two or more tables based on a related column. `INNER JOIN` returns matching rows only; `LEFT JOIN` returns all rows from the left table plus matches; `RIGHT JOIN` and `FULL JOIN` work symmetrically.",
+      "intent": "code"
+    },
+    {
+      "question": "What is an index in a database?",
+      "answer": "An index is an auxiliary data structure that speeds up reads on indexed columns, similar to a book's index. Trade-off: queries become faster but inserts/updates become slightly slower and the index uses extra storage.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between DDL and DML?",
+      "answer": "DDL (Data Definition Language) defines structure: CREATE, ALTER, DROP. DML (Data Manipulation Language) handles data: SELECT, INSERT, UPDATE, DELETE.",
+      "intent": "code"
+    },
+    {
+      "question": "What is normalization in databases?",
+      "answer": "Normalization organises tables to reduce redundancy and dependency by splitting data into related tables. The normal forms (1NF, 2NF, 3NF, BCNF) progressively remove duplicate data and partial/transitive dependencies.",
+      "intent": "code"
+    },
+    {
+      "question": "What is an ACID transaction?",
+      "answer": "ACID describes reliable database transactions: Atomicity (all or nothing), Consistency (valid state), Isolation (concurrent transactions don't interfere) and Durability (committed data survives crashes).",
+      "intent": "code"
+    },
+    {
+      "question": "What is a Python virtual environment?",
+      "answer": "See the Python virtual environment entry - run `python -m venv .venv` to create an isolated environment so project dependencies do not clash.",
+      "intent": "code"
+    },
+    {
+      "question": "What is machine learning?",
+      "answer": "Machine learning is training algorithms on data so they can make predictions or decisions without being explicitly programmed for every case. Common types: supervised (labelled data), unsupervised (find patterns) and reinforcement (learn from rewards).",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between supervised and unsupervised learning?",
+      "answer": "Supervised learning uses labelled data to learn input-output mapping (classification, regression). Unsupervised learning finds structure in unlabelled data (clustering, dimensionality reduction).",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a compiler and an interpreter in simple words?",
+      "answer": "A compiler translates the entire program at once before running it, reporting all errors together. An interpreter runs it line by line, stopping at the first error. Compiled programs are usually faster; interpreted ones are easier to test.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a for loop?",
+      "answer": "A for loop repeats a block of code for each item in a sequence. Example (Python): `for i in range(5): print(i)` prints 0 to 4. Use it when you know how many times to iterate.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a for loop and a while loop?",
+      "answer": "A `for` loop iterates over a sequence or a known number of times. A `while` loop repeats as long as a condition is true, which suits unknown iteration counts. Always make sure a while loop can eventually become false.",
+      "intent": "code"
+    },
+    {
+      "question": "How do I reverse a string in Python?",
+      "answer": "The simplest way is slicing: `s[::-1]`. Or build it manually: `''.join(reversed(s))`. Both return a new reversed string since strings are immutable.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between an array and a list?",
+      "answer": "Python's built-in list is dynamic and can hold mixed types. A fixed-size, typed structure comes from `array` or NumPy arrays. NumPy arrays are much faster for large numerical computations because they store data contiguously.",
+      "intent": "code"
+    },
+    {
+      "question": "What is NumPy used for?",
+      "answer": "NumPy provides the `ndarray` object for fast numerical computation - vectorised maths, linear algebra, random numbers and broadcasting. It is the foundation of pandas, scikit-learn and most Python data science tooling.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a REST API?",
+      "answer": "A REST API exposes resources over HTTP using standard methods: GET (read), POST (create), PUT/PATCH (update), DELETE (remove). It usually exchanges JSON and is stateless - each request carries all needed information.",
+      "intent": "code"
+    },
+    {
+      "question": "What is JSON?",
+      "answer": "JSON (JavaScript Object Notation) is a lightweight text format for data exchange using key-value pairs, arrays and strings/numbers/booleans. Example: `{\"name\": \"Amit\", \"marks\": 92}`. Most web APIs use JSON.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between client and server?",
+      "answer": "The client (browser, app) requests resources and displays the interface. The server stores data, runs business logic and responds to requests. Communication usually happens over HTTP with HTML/JSON payloads.",
+      "intent": "code"
+    },
+    {
+      "question": "What is HTTP and HTTPS?",
+      "answer": "HTTP is the protocol browsers use to request and receive web pages. HTTPS is HTTP encrypted with TLS, protecting data from eavesdropping and tampering. Always use HTTPS for sites that handle passwords or payments.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a static website?",
+      "answer": "A static website serves the same pre-built HTML/CSS/JS files to every visitor. It is fast, cheap to host and secure - ideal for portfolios and documentation. Dynamic sites generate content per user and need a server or backend.",
+      "intent": "code"
+    },
+    {
+      "question": "What is version control?",
+      "answer": "Version control records changes to files over time so you can recall specific snapshots, compare versions and collaborate. Git is the most widely used system. Commit often with clear messages to keep history useful.",
+      "intent": "code"
+    },
+    {
+      "question": "How do I start learning to code?",
+      "answer": "Pick one beginner-friendly language (Python is great), learn variables, loops, conditions and functions, then solve small problems daily and build tiny projects. Debugging real code teaches faster than only reading tutorials.",
+      "intent": "study"
+    },
+    {
+      "question": "coding kaise start karu",
+      "answer": "Python se start karo - variables, loops, conditions aur functions samjho. Roz 30-60 minute chhote problems solve karo (calculator, to-do list) aur ek mini project banao. Sirf tutorial dekhne se nahi, code likhne se seekhoge.",
+      "intent": "study"
+    },
+    {
+      "question": "What is the quadratic formula?",
+      "answer": "For ax² + bx + c = 0, the roots are x = (-b ± √(b² - 4ac)) / (2a). The term b² - 4ac is the discriminant: positive means two real roots, zero means one repeated root, negative means complex roots.",
+      "intent": "math"
+    },
+    {
+      "question": "What is a derivative in calculus?",
+      "answer": "A derivative measures how fast a function changes - the slope of the tangent at a point. d/dx(x²) = 2x. Basic rules: power rule (nxⁿ⁻¹), product rule, quotient rule and chain rule.",
+      "intent": "math"
+    },
+    {
+      "question": "What is integration?",
+      "answer": "Integration is the reverse of differentiation - it finds the area under a curve or the accumulated quantity. The power rule: ∫xⁿ dx = xⁿ⁺¹/(n+1) + C (for n ≠ -1). Definite integrals give a numeric area between limits.",
+      "intent": "math"
+    },
+    {
+      "question": "Explain the Pythagoras theorem",
+      "answer": "In a right-angled triangle, the square of the hypotenuse equals the sum of squares of the other two sides: a² + b² = c². It is used to find distances, in geometry proofs and in coordinate geometry.",
+      "intent": "math"
+    },
+    {
+      "question": "What are the basic trigonometry ratios?",
+      "answer": "In a right triangle: sin θ = opposite/hypotenuse, cos θ = adjacent/hypotenuse, tan θ = opposite/adjacent. Remember SOH-CAH-TOA. Key identity: sin²θ + cos²θ = 1.",
+      "intent": "math"
+    },
+    {
+      "question": "What is probability?",
+      "answer": "Probability measures how likely an event is, from 0 (impossible) to 1 (certain). P(event) = favourable outcomes / total outcomes. For independent events, P(A and B) = P(A) × P(B).",
+      "intent": "math"
+    },
+    {
+      "question": "What is a matrix?",
+      "answer": "A matrix is a rectangular array of numbers arranged in rows and columns, written like [[1,2],[3,4]]. You can add matrices of the same size, multiply them (with compatible dimensions) and find the determinant and inverse of square matrices.",
+      "intent": "math"
+    },
+    {
+      "question": "How do I calculate percentage?",
+      "answer": "Percentage = (part / total) × 100. Example: 45 marks out of 60 = (45/60) × 100 = 75%. To find x% of N, compute N × x / 100.",
+      "intent": "math"
+    },
+    {
+      "question": "What is the difference between mean, median and mode?",
+      "answer": "Mean is the average (sum divided by count). Median is the middle value when sorted. Mode is the most frequent value. Median is best for skewed data, mean for symmetric data, mode for categories.",
+      "intent": "math"
+    },
+    {
+      "question": "What is algebra?",
+      "answer": "Algebra uses symbols (usually x, y) to represent unknown values and builds equations from them. Core skills: simplifying expressions, solving linear equations, factorising quadratics and rearranging formulas.",
+      "intent": "math"
+    },
+    {
+      "question": "How do I solve a linear equation?",
+      "answer": "Isolate the variable by doing the same operation on both sides. Example: 2x + 5 = 13 → 2x = 8 → x = 4. Always check by substituting your answer back into the original equation.",
+      "intent": "math"
+    },
+    {
+      "question": "What is LCM and HCF?",
+      "answer": "HCF (GCD) is the largest number dividing both values; LCM is the smallest number both divide into. Relationship: HCF × LCM = product of the two numbers. Use prime factorisation or repeated division to find them.",
+      "intent": "math"
+    },
+    {
+      "question": "What is coordinate geometry?",
+      "answer": "Coordinate geometry describes shapes using points on an x-y plane. Distance between points = √((x₂-x₁)² + (y₂-y₁)²). The line equation is y = mx + c where m is the slope and c the y-intercept.",
+      "intent": "math"
+    },
+    {
+      "question": "What is standard deviation?",
+      "answer": "Standard deviation measures how spread out numbers are from the mean. Steps: find the mean, subtract it from each value, square the results, average them (variance), then take the square root. Low deviation means data is clustered.",
+      "intent": "math"
+    },
+    {
+      "question": "What is a logarithm?",
+      "answer": "log_b(x) asks 'to what power must we raise b to get x?'. Example: log₁₀(1000) = 3. Key rules: log(ab) = log a + log b, log(a/b) = log a - log b, log(aⁿ) = n log a. log with base e is written ln.",
+      "intent": "math"
+    },
+    {
+      "question": "What is set theory?",
+      "answer": "A set is a collection of distinct elements. Union (∪) combines sets, intersection (∩) takes common elements, difference (−) removes elements. The complement contains everything outside the set within a universal set.",
+      "intent": "math"
+    },
+    {
+      "question": "Explain photosynthesis",
+      "answer": "Photosynthesis is the process plants use to convert sunlight, water and carbon dioxide into glucose and oxygen. It happens mainly in chloroplasts using chlorophyll: 6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂.",
+      "intent": "science"
+    },
+    {
+      "question": "What is gravity?",
+      "answer": "Gravity is the attractive force between objects with mass. On Earth's surface it accelerates objects at about 9.8 m/s². Newton's law: F = G·m₁m₂/r², so force grows with mass and weakens with distance.",
+      "intent": "science"
+    },
+    {
+      "question": "What is Newton's first law of motion?",
+      "answer": "Newton's first law (law of inertia) states that an object stays at rest or keeps moving at constant velocity unless acted on by a net external force. A seatbelt protects you because your body keeps moving when the car stops.",
+      "intent": "science"
+    },
+    {
+      "question": "What is Newton's second law of motion?",
+      "answer": "Newton's second law states that force equals mass times acceleration: F = m·a. Doubling the force doubles the acceleration; doubling the mass halves it for the same force.",
+      "intent": "science"
+    },
+    {
+      "question": "What is Newton's third law of motion?",
+      "answer": "Newton's third law: for every action there is an equal and opposite reaction. When you push a wall, the wall pushes you back with equal force. The forces act on different objects, so they do not cancel each other.",
+      "intent": "science"
+    },
+    {
+      "question": "What is the water cycle?",
+      "answer": "The water cycle moves water through the environment: evaporation from water bodies, condensation into clouds, precipitation as rain/snow, then collection and runoff back to oceans, restarting the cycle.",
+      "intent": "science"
+    },
+    {
+      "question": "Why is the sky blue?",
+      "answer": "Sunlight is made of many colours. Air molecules scatter shorter (blue and violet) wavelengths much more strongly than longer red wavelengths - a process called Rayleigh scattering. Our eyes are more sensitive to blue, so the sky appears blue.",
+      "intent": "science"
+    },
+    {
+      "question": "What is an atom?",
+      "answer": "An atom is the smallest unit of an element, made of a nucleus (protons + neutrons) surrounded by electrons. The number of protons (atomic number) defines the element. Chemical bonds involve the outer electrons.",
+      "intent": "science"
+    },
+    {
+      "question": "cell kya hota hai",
+      "answer": "Cell jeev ke sabse chhote structural aur functional unit hai. Har cell ke andar membrane, cytoplasm aur DNA hota hai. Plant cells mein cell wall aur chloroplast bhi hote hain. Single-celled organisms ek hi cell se bante hain.",
+      "intent": "science"
+    },
+    {
+      "question": "What is the difference between mass and weight?",
+      "answer": "Mass is the amount of matter in an object (measured in kg) and stays the same everywhere. Weight is the force of gravity on that mass (W = m·g) and changes with location - on the Moon you weigh about one-sixth of Earth weight.",
+      "intent": "science"
+    },
+    {
+      "question": "What is energy and what are its types?",
+      "answer": "Energy is the capacity to do work. Major forms: kinetic (motion), potential (position), thermal (heat), chemical (bonds), electrical, nuclear and light. Energy cannot be created or destroyed, only converted (law of conservation of energy).",
+      "intent": "science"
+    },
+    {
+      "question": "What is an electric circuit?",
+      "answer": "An electric circuit is a closed path that lets current flow from a power source through components and back. It needs a voltage source, conductors and a load. Current flows only when the circuit is complete (closed loop).",
+      "intent": "science"
+    },
+    {
+      "question": "What is the difference between an acid and a base?",
+      "answer": "Acids donate hydrogen ions (H⁺) and have a pH below 7; bases accept protons and have a pH above 7. Acid + base → salt + water (neutralisation). Examples: vinegar is acidic, baking soda solution is basic.",
+      "intent": "science"
+    },
+    {
+      "question": "What is a chemical reaction?",
+      "answer": "A chemical reaction rearranges atoms to form new substances. Reactants become products. Signs of a reaction: colour change, gas bubbles, heat release or precipitate. In a balanced equation, atoms of each element are conserved.",
+      "intent": "science"
+    },
+    {
+      "question": "What is DNA?",
+      "answer": "DNA (deoxyribonucleic acid) is the molecule carrying genetic instructions. It is a double helix of two strands made of nucleotides (A, T, C, G) where A pairs with T and C pairs with G. It controls growth, reproduction and traits.",
+      "intent": "science"
+    },
+    {
+      "question": "How do I improve my concentration while studying?",
+      "answer": "Work in focused 25-50 minute blocks (Pomodoro), keep your phone in another room, study at a fixed place, remove background noise, take short breaks, sleep well and start with the hardest task when your energy is highest.",
+      "intent": "study"
+    },
+    {
+      "question": "padhai kaise karu",
+      "answer": "Roz fixed time par baitho, 25-50 minute focused blocks mein padho (Pomodoro), phone door rakho, notes banao, aur roz thoda revise karo. Samajhne ki koshish karo yaad karne ki nahi. Neend aur break bhi zaroori hain.",
+      "intent": "study"
+    },
+    {
+      "question": "What are the best study techniques?",
+      "answer": "Active recall (test yourself instead of re-reading), spaced repetition (review at increasing intervals), interleaving different topics, explaining concepts in your own words and practicing past papers. Passive re-reading is the least effective technique.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I memorize things faster?",
+      "answer": "Use active recall, break material into small chunks, attach vivid associations or stories, use mnemonic devices, teach the concept to someone else and revise at spaced intervals (1 day, 3 days, 7 days). Recall beats re-reading.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I take good study notes?",
+      "answer": "Use the Cornell method: divide the page into notes (right), cues (left) and summary (bottom). Write in your own words, keep lines short, highlight key formulas and review/expand your notes within 24 hours.",
+      "intent": "study"
+    },
+    {
+      "question": "How many hours should I study every day?",
+      "answer": "Quality matters more than hours. Students often do 3-6 effective hours daily. Use focused blocks with breaks, be consistent, and increase gradually before exams. Track what you actually learned, not time spent at the desk.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I revise effectively before an exam?",
+      "answer": "Make a revision timetable covering all subjects, prioritise weak topics, use active recall and past papers, revise summaries and formulas daily, teach concepts aloud and avoid learning entirely new topics the night before the exam.",
+      "intent": "study"
+    },
+    {
+      "question": "What is the Pomodoro technique?",
+      "answer": "The Pomodoro technique is 25 minutes of undistracted work followed by a 5 minute break; after four cycles take a longer 15-30 minute break. It keeps focus high and prevents burnout. Adjust the intervals to what suits you.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I stop procrastinating?",
+      "answer": "Break tasks into tiny first steps (open the book, solve one problem), set a 10 minute timer to start, remove distractions, use deadlines and reward yourself after finishing. Starting is the hardest part - make the start effortless.",
+      "intent": "study"
+    },
+    {
+      "question": "What is active recall?",
+      "answer": "Active recall means testing yourself on the material instead of passively re-reading it. Close the book and try to write down what you remember, use flashcards or answer practice questions. Each retrieval strengthens the memory.",
+      "intent": "study"
+    },
+    {
+      "question": "What is spaced repetition?",
+      "answer": "Spaced repetition reviews information at gradually increasing intervals - after 1 day, then 3 days, then a week - right before you would forget it. This moves knowledge into long-term memory far more efficiently than cramming.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I make a study timetable?",
+      "answer": "List subjects and their weightage, note available hours, schedule hard subjects when you are most alert, add short breaks between sessions, include revision time, and leave buffer slots. Keep it realistic so you can actually follow it.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I prepare for exams in one week?",
+      "answer": "Day 1-2: cover syllabus and mark weak areas. Day 3-5: focused revision with active recall and past papers. Day 6: mixed practice tests under timed conditions. Day 7: light review, formulas and good sleep. Avoid all-nighters.",
+      "intent": "study"
+    },
+    {
+      "question": "What should I do on the day of an exam?",
+      "answer": "Sleep well the previous night, eat a light breakfast, reach early, read all questions first, attempt easy ones to build confidence, manage time per question, attempt everything (no negative marking usually) and stay calm during tough sections.",
+      "intent": "study"
+    },
+    {
+      "question": "How to deal with exam stress?",
+      "answer": "Prepare early so revision is not rushed, practise timed tests to build familiarity, use deep breathing or short walks to calm down, avoid comparing with others, focus on your own progress and remember one exam does not define you.",
+      "intent": "study"
+    },
+    {
+      "question": "How can I improve my memory for studies?",
+      "answer": "Sleep 7-8 hours, exercise regularly, stay hydrated, use active recall and spaced repetition, teach others, get sunlight, reduce sugar and junk food, and study in short focused sessions. Memory improves with healthy habits as much as technique.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I stay motivated to study?",
+      "answer": "Set small clear goals, track daily progress, reward yourself after milestones, study with an accountability partner, visualise your end goal, and start with the easiest task to build momentum. Motivation often follows action, not the other way around.",
+      "intent": "study"
+    },
+    {
+      "question": "What is a good morning routine for students?",
+      "answer": "Wake up early, hydrate, do light exercise or a walk, eat a proper breakfast, review your daily plan, tackle your hardest subject while your mind is fresh and avoid the phone for the first 30 minutes.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I balance study and rest?",
+      "answer": "Use focused work blocks with real breaks, take one full rest day or half-day per week, sleep enough, and never feel guilty about rest - memory consolidates during sleep. Sustainable rhythm beats exhausting cramming.",
+      "intent": "study"
+    },
+    {
+      "question": "What is the best way to learn from mistakes?",
+      "answer": "Keep an error journal: write the wrong answer, why you got it wrong and the correct reasoning. Review it weekly. Repeating the same mistake is normal at first - the journal makes you notice patterns and fix them permanently.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I improve my writing for assignments?",
+      "answer": "Plan an outline first, write clear topic sentences, support each point with evidence or examples, use simple sentences, avoid plagiarism by paraphrasing and cite sources, then proofread for grammar and flow before submitting.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I present a project confidently?",
+      "answer": "Know your audience, start with a strong hook, practise the talk multiple times aloud, keep slides minimal with visuals, prepare for likely questions, make eye contact and speak slowly. Confidence comes from rehearsal.",
+      "intent": "study"
+    },
+    {
+      "question": "What is time management for students?",
+      "answer": "Prioritise tasks by urgency and importance, plan the week ahead, batch similar tasks, use time blocks for deep work, say no to low-value activities, and review what you accomplished each evening to improve tomorrow's plan.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I reduce screen time while studying?",
+      "answer": "Turn off notifications, use website blockers during study blocks, keep the phone in another room, switch to paper notes where possible, set specific check-in times for messages and use grayscale mode to make the phone less tempting.",
+      "intent": "study"
+    },
+    {
+      "question": "What are productivity tips for college students?",
+      "answer": "Use a single planner or app for all tasks, apply the two-minute rule for quick items, eat and sleep well, study in focused blocks, batch admin tasks, review goals weekly and protect your mornings for deep work.",
+      "intent": "study"
+    },
+    {
+      "question": "How can I be more productive at home?",
+      "answer": "Create a dedicated clutter-free study corner, follow a fixed schedule, dress like you are going to study (not stay in pyjamas), set daily three must-do tasks, take scheduled breaks and keep family informed of your focus hours.",
+      "intent": "study"
+    },
+    {
+      "question": "What is the two-minute rule?",
+      "answer": "If a task takes less than two minutes, do it immediately instead of adding it to a list. For bigger tasks, commit to working on them for just two minutes - starting is usually the hardest part and momentum takes over.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I organize my study material?",
+      "answer": "Keep one folder per subject (physical or digital), name files consistently, use colour codes, maintain a master index of chapters and note important pages. Back up digital files regularly so you never lose notes.",
+      "intent": "study"
+    },
+    {
+      "question": "What is a computer?",
+      "answer": "A computer is an electronic device that accepts data (input), processes it with a CPU, stores it in memory and produces results (output). Input devices include keyboard and mouse; output devices include monitor and printer.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is the difference between RAM and ROM?",
+      "answer": "RAM is volatile working memory - it holds data and programs currently in use and loses content when powered off. ROM is non-volatile and stores permanent instructions like the boot firmware, which survives power loss.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is an operating system?",
+      "answer": "An operating system is system software that manages hardware and provides services for programs - process scheduling, memory management, file systems and device control. Examples: Windows, macOS, Linux, Android and iOS.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is the difference between hardware and software?",
+      "answer": "Hardware is the physical equipment - CPU, monitor, keyboard. Software is the programs and data that tell the hardware what to do - applications and the operating system. Hardware runs the software.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is the CPU?",
+      "answer": "The Central Processing Unit is the brain of the computer. It fetches, decodes and executes instructions using the ALU, control unit and registers. Speed is measured in GHz; modern CPUs have multiple cores for parallel work.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is cloud computing?",
+      "answer": "Cloud computing delivers computing services - servers, storage, databases and software - over the internet on demand. Benefits: pay as you go, instant scaling and no hardware maintenance. Examples: Google Drive, AWS, Azure.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is the difference between a file and a folder?",
+      "answer": "A file is a single unit of data or program (like a document or photo) with a name and extension. A folder (directory) is a container that organises files and other folders, making the file system easy to navigate.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is an IP address?",
+      "answer": "An IP address is a unique number assigned to each device on a network so data can reach the right destination, like a postal address. IPv4 looks like 192.168.1.1; IPv6 is longer and provides far more addresses.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is the difference between a browser and a search engine?",
+      "answer": "A browser (Chrome, Firefox, Edge) is software that displays websites. A search engine (Google, Bing) is a website that helps you find other pages. You use a browser to visit a search engine.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is a bug in programming?",
+      "answer": "A bug is an error or flaw in code that produces wrong results or crashes. Debugging techniques: read the traceback, use print statements or a debugger, check edge cases and reproduce the problem in a small example.",
+      "intent": "code"
+    },
+    {
+      "question": "code error aa raha hai kaise fix karu",
+      "answer": "Pehle error message aur traceback dhyan se padho - line number dekho. Phir us line par values print karke check karo. Common causes: typo, galat type, missing import, ya list/dict me galat key. Error ko Google karo aur chhote test case se reproduce karo.",
+      "intent": "code"
+    },
+    {
+      "question": "What is pseudocode?",
+      "answer": "Pseudocode is a plain-language description of an algorithm using numbered steps and simple structure without strict syntax. It helps you plan the logic before writing actual code and communicates algorithms clearly to others.",
+      "intent": "code"
+    },
+    {
+      "question": "What is debugging?",
+      "answer": "Debugging is finding and fixing errors in a program. Strategies: reproduce the bug, isolate it to the smallest case, read error messages carefully, add logging/print statements, use a step-through debugger, and fix then regression-test.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a program and a software?",
+      "answer": "A program is a single set of instructions that performs a task. Software is the broader term covering programs, libraries, documentation and configuration that together provide functionality on a computer.",
+      "intent": "code"
+    },
+    {
+      "question": "What is open source software?",
+      "answer": "Open source software publishes its source code so anyone can inspect, modify and distribute it under a licence. Examples: Linux, Python, Firefox. Benefits: transparency, community improvements and no vendor lock-in.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a data structure?",
+      "answer": "A data structure is a way of organising data for efficient access and modification - arrays, linked lists, stacks, queues, trees, graphs and hash tables. Choosing the right one directly affects program performance.",
+      "intent": "code"
+    },
+    {
+      "question": "What is an operating system kernel?",
+      "answer": "The kernel is the core of the OS that manages CPU, memory and devices and mediates between hardware and user programs. In monolithic kernels these services share an address space; in microkernels they run as separate processes.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is the difference between a static and dynamic website?",
+      "answer": "Static sites serve fixed HTML to everyone and are fast and cheap to host. Dynamic sites generate content per request using server-side code and databases, allowing personalisation, search and user accounts.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a compiler error versus a runtime error?",
+      "answer": "A compiler error is found before the program runs (syntax mistakes, type errors) and prevents building. A runtime error happens while executing (divide by zero, missing file) and crashes an already-built program.",
+      "intent": "code"
+    },
+    {
+      "question": "How do I choose a programming language to learn?",
+      "answer": "Pick by goal: Python for general purpose, data and AI; JavaScript for web front-end; Java/C# for enterprise and Android; C/C++ for systems and competitive programming. For beginners, Python's simple syntax makes it the easiest start.",
+      "intent": "study"
+    },
+    {
+      "question": "What is competitive programming?",
+      "answer": "Competitive programming solves algorithmic problems under time constraints on platforms like Codeforces, LeetCode and CodeChef. It builds problem solving, data structures and algorithms skills that help in interviews and placements.",
+      "intent": "study"
+    },
+    {
+      "question": "What should I include in a resume for my first job?",
+      "answer": "Keep it one page: contact details, a short summary, education, projects with measurable outcomes, relevant skills, internships or certifications, and links to GitHub/portfolio. Tailor it to each job description and avoid typos.",
+      "intent": "ask"
+    },
+    {
+      "question": "What skills do I need for a career in software?",
+      "answer": "Core: one language deeply, data structures and algorithms, databases, Git, and problem solving. Add: system design basics, testing, communication, and a portfolio of real projects. Continuous learning matters more than any single tool.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is the difference between a job and a career?",
+      "answer": "A job is paid work you do now, often focused on immediate income. A career is the long-term progression of roles, skills and growth in a field. A good career aligns your work with your interests and long-term goals.",
+      "intent": "ask"
+    },
+    {
+      "question": "How do I prepare for a technical interview?",
+      "answer": "Practice data structures and algorithms regularly, solve mock interviews aloud, review your own projects deeply, prepare STAR stories for behavioural questions, research the company, and prepare thoughtful questions to ask the interviewer.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is an internship and why is it useful?",
+      "answer": "An internship is a short, often entry-level work experience in a company. It gives real-world skills, mentorship, a professional network and a line on your resume that significantly improves job prospects after graduation.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is freelancing?",
+      "answer": "Freelancing means working independently for multiple clients on a project basis instead of one employer. It offers flexible hours and variety but requires self-marketing, discipline and managing irregular income.",
+      "intent": "ask"
+    },
+    {
+      "question": "How do I start a student project portfolio?",
+      "answer": "Build 3-5 small, complete projects that solve real problems, host the code on GitHub with clear READMEs, deploy a couple live, document what you learned, and link the portfolio from your resume and LinkedIn.",
+      "intent": "ask"
+    },
+    {
+      "question": "Why are communication skills important for students?",
+      "answer": "Clear communication helps you explain ideas, work in teams, write better assignments and perform in interviews. It multiplies technical ability - the best solution fails if you cannot explain it to others.",
+      "intent": "ask"
+    },
+    {
+      "question": "What should I do after 12th grade?",
+      "answer": "Choose based on interest and goals: a degree in engineering/science/commerce/arts, diploma, or skill-based courses. Research course content and career paths, talk to people in the field, and pick something you can sustain for years.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is higher education?",
+      "answer": "Higher education is study after secondary school - bachelor's, master's and doctoral degrees offered by universities and colleges. It builds specialised knowledge and credentials, though many careers also value skills and portfolios.",
+      "intent": "ask"
+    },
+    {
+      "question": "How do I stay healthy as a student?",
+      "answer": "Sleep 7-9 hours, eat balanced meals, exercise or walk 30 minutes daily, drink enough water, limit junk food and sugary drinks, take screen breaks, and manage stress with breaks and hobbies.",
+      "intent": "study"
+    },
+    {
+      "question": "What is a healthy study environment?",
+      "answer": "A quiet, well-lit, ventilated space with a clean desk, comfortable chair, all materials within reach, minimal clutter, phone away and good lighting. Consistency helps - the same spot trains your brain to focus there.",
+      "intent": "study"
+    },
+    {
+      "question": "How much sleep do students need?",
+      "answer": "Teenagers generally need 8-10 hours and adults 7-9 hours. Sleep consolidates memory, so pulling all-nighters actually reduces recall. Keep a fixed sleep schedule and avoid screens for 30-60 minutes before bed.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I make effective flashcards?",
+      "answer": "One question and one answer per card, phrased as something you can test yourself on, written in your own words. Use images or mnemonics where helpful, keep decks small by topic, and review them with spaced repetition.",
+      "intent": "study"
+    },
+    {
+      "question": "What is group study and is it effective?",
+      "answer": "Group study works well for discussing doubts, teaching each other and solving problems together - teaching is powerful recall. It fails when it becomes chatting. Set a clear agenda, keep groups small (2-4) and stay time-boxed.",
+      "intent": "study"
+    },
+    {
+      "question": "How do I solve word problems in maths?",
+      "answer": "Read the problem twice, identify what is given and what is asked, convert words into an equation, solve step by step, and check whether the answer makes physical sense (units, sign, magnitude).",
+      "intent": "math"
+    },
+    {
+      "question": "How do I overcome maths phobia?",
+      "answer": "Start with fundamentals and go slowly, practise a little daily instead of long weekly sessions, learn from worked examples before attempting problems, celebrate small wins, and ask for help early so gaps do not pile up.",
+      "intent": "math"
+    },
+    {
+      "question": "What is a prime number?",
+      "answer": "A prime number is greater than 1 and divisible only by 1 and itself: 2, 3, 5, 7, 11, 13... 2 is the only even prime. Test divisibility up to the square root of the number.",
+      "intent": "math"
+    },
+    {
+      "question": "What is the difference between an even and an odd number?",
+      "answer": "An even number is divisible by 2 with no remainder (…, -2, 0, 2, 4, 6) while an odd number leaves a remainder of 1 (…, -1, 1, 3, 5). In code, check with `n % 2 == 0`.",
+      "intent": "math"
+    },
+    {
+      "question": "What is simple interest?",
+      "answer": "Simple interest is calculated only on the principal: SI = (P × R × T) / 100, where P is principal, R is annual rate and T is time in years. Total amount = P + SI. Compound interest additionally earns interest on interest.",
+      "intent": "math"
+    },
+    {
+      "question": "What is a fraction?",
+      "answer": "A fraction represents part of a whole: numerator over denominator (3/4). To add fractions they need a common denominator; multiply numerators and denominators to multiply; flip and multiply to divide.",
+      "intent": "math"
+    },
+    {
+      "question": "What are integers?",
+      "answer": "Integers are whole numbers including negatives, zero and positives (…, -2, -1, 0, 1, 2, …). They are closed under addition, subtraction and multiplication but not division (dividing may produce a fraction).",
+      "intent": "math"
+    },
+    {
+      "question": "What is the difference between speed and velocity?",
+      "answer": "Speed is distance over time and is a scalar - it has only magnitude. Velocity is displacement over time and is a vector - it includes direction. Average speed = total distance / total time.",
+      "intent": "science"
+    },
+    {
+      "question": "What is the difference between mass and weight again?",
+      "answer": "Mass measures matter in kg and is constant everywhere. Weight is the gravitational force on that mass (W = mg) measured in newtons, and it changes with location.",
+      "intent": "science"
+    },
+    {
+      "question": "What is an ecosystem?",
+      "answer": "An ecosystem is a community of living organisms interacting with each other and their physical environment - sunlight, water, soil. It includes biotic factors (plants, animals) and abiotic factors (temperature, minerals) linked by energy flow and nutrient cycles.",
+      "intent": "science"
+    },
+    {
+      "question": "Why do we fall ill?",
+      "answer": "Illness occurs when the body's defences are overcome by pathogens (bacteria, viruses), genetic factors, nutritional deficiency or lifestyle. The immune system fights infections; hygiene, vaccination and nutrition help prevent them.",
+      "intent": "science"
+    },
+    {
+      "question": "What is the difference between a plant cell and an animal cell?",
+      "answer": "Plant cells have a rigid cell wall, large central vacuole and chloroplasts for photosynthesis. Animal cells lack these but have centrioles. Both have a nucleus, membrane, cytoplasm and mitochondria.",
+      "intent": "science"
+    },
+    {
+      "question": "What is friction?",
+      "answer": "Friction is the force that resists motion when two surfaces slide or try to slide against each other. It converts kinetic energy to heat. Useful for walking and braking, wasteful in machines - lubricants reduce it.",
+      "intent": "science"
+    },
+    {
+      "question": "What is the difference between a physical and chemical change?",
+      "answer": "A physical change alters form but not composition and is usually reversible - ice melting, paper torn. A chemical change forms new substances and is usually irreversible - burning wood, rusting iron, cooking.",
+      "intent": "science"
+    },
+    {
+      "question": "What is photosynthesis used for by the plant?",
+      "answer": "The glucose produced is used for energy (cellular respiration), growth and building cellulose and starch. Oxygen released as a byproduct is essential for most living things on Earth.",
+      "intent": "science"
+    },
+    {
+      "question": "What are vitamins?",
+      "answer": "Vitamins are organic micronutrients needed in small amounts for metabolism. Fat-soluble vitamins (A, D, E, K) are stored in the body; water-soluble ones (B, C) are excreted regularly. Deficiency causes diseases like scurvy (C) and rickets (D).",
+      "intent": "science"
+    },
+    {
+      "question": "How do I use Git on Windows?",
+      "answer": "Install Git for Windows, then use Git Bash or PowerShell. Standard flow: `git clone <url>`, edit files, `git add .`, `git commit -m \"message\"`, `git push`. Configure once with `git config --global user.name` and `user.email`.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a terminal or command prompt?",
+      "answer": "A terminal is a text interface for giving commands to the computer. Common commands: `dir`/`ls` to list files, `cd` to change directory, `mkdir` to create a folder. Programmers use it to run scripts, manage Git and install packages.",
+      "intent": "code"
+    },
+    {
+      "question": "What is an IDE?",
+      "answer": "An IDE (Integrated Development Environment) combines an editor, compiler/interpreter, debugger and build tools in one application. Popular choices: VS Code, PyCharm, IntelliJ. It speeds up coding with autocomplete and error highlighting.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a website and a web application?",
+      "answer": "A website mainly displays static or informational content. A web application is interactive and performs tasks - editing documents, shopping, chatting - with state, user accounts and server-side logic.",
+      "intent": "code"
+    },
+    {
+      "question": "What is front-end and back-end?",
+      "answer": "Front-end is what users see and interact with (HTML, CSS, JavaScript, React). Back-end handles data, business logic and servers (Python, Node, databases, APIs). Full-stack development covers both.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a framework in programming?",
+      "answer": "A framework is a pre-built structure of libraries and conventions that shapes how you build applications - Django/Flask for Python web apps, React for UI. It handles boilerplate so you focus on business logic.",
+      "intent": "code"
+    },
+    {
+      "question": "What is SQL injection?",
+      "answer": "SQL injection is an attack where a user inserts malicious SQL through input fields to read or modify data. Prevent it with parameterised queries/prepared statements, input validation and least-privilege database accounts.",
+      "intent": "code"
+    },
+    {
+      "question": "What is a password best practice?",
+      "answer": "Use a long passphrase or 12+ character password mixing types, a unique password per service, a password manager to store them, enable two-factor authentication, and never share passwords or reuse them across sites.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is cyber security?",
+      "answer": "Cyber security protects systems, networks and data from theft, damage or unauthorised access. Core practices: strong passwords, updates, antivirus, encryption, backups, phishing awareness and least-privilege access.",
+      "intent": "ask"
+    },
+    {
+      "question": "How do I back up my files?",
+      "answer": "Follow the 3-2-1 rule: 3 copies of your data, on 2 different media, with 1 stored offsite or in the cloud. Automate backups, verify they restore correctly, and never rely on a single drive.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is data privacy?",
+      "answer": "Data privacy means controlling how personal information is collected, used and shared. Protect yourself with strong passwords, minimal app permissions, careful sharing on social media and reading what data services collect.",
+      "intent": "ask"
+    },
+    {
+      "question": "How do I make a good presentation?",
+      "answer": "One idea per slide, minimal text with visuals, large readable fonts, a clear beginning-middle-end, rehearse aloud with timing, prepare for questions, and open with something that grabs attention.",
+      "intent": "study"
+    },
+    {
+      "question": "What is a SMART goal?",
+      "answer": "SMART goals are Specific, Measurable, Achievable, Relevant and Time-bound. Example: instead of 'study maths', say 'solve 20 algebra problems daily for 2 weeks'. Vague goals rarely get done; specific ones get scheduled and tracked.",
+      "intent": "study"
+    },
+    {
+      "question": "how to start a study group",
+      "answer": "Find 2-4 serious classmates, set a fixed weekly time and place, decide topics in advance, take turns explaining concepts, solve problems together, and keep a shared list of doubts. End every session with what to revise next.",
+      "intent": "study"
+    },
+    {
+      "question": "quiz kaise start karu",
+      "answer": "Bas /quiz command type karo - subject choose karoge (Python, Science, Math, Computer, GK), phir 5 questions aayengi. Har jawab ke baad turant result aur end mein score mil jayega.",
+      "intent": "quiz"
+    },
+    {
+      "question": "study plan bana do",
+      "answer": "Command /planner use karo - subjects, daily available hours aur days enter karo. Main aapko day-wise time slots ke saath practical schedule bana kar duga jo offline bhi kaam karega.",
+      "intent": "planner"
+    },
+    {
+      "question": "kya commands hain is chatbot mein",
+      "answer": "Commands: /help (menu), /quiz (test), /planner (schedule), /history (recent chat), /mode (online/offline), /clear (screen saaf), /exit (band).",
+      "intent": "help"
+    },
+    {
+      "question": "How do I learn web development?",
+      "answer": "Learn HTML for structure, CSS for styling, then JavaScript for interactivity. Build small pages, then add a backend (Python/Node) and a database. Finally deploy a project and learn Git/GitHub along the way.",
+      "intent": "code"
+    },
+    {
+      "question": "What is responsive design in simple words?",
+      "answer": "Your website should look good on phones, tablets and desktops. Achieve it with relative units, flexible layouts (Flexbox/Grid), media queries and images that scale - then test by resizing the browser.",
+      "intent": "code"
+    },
+    {
+      "question": "What is version control used for in teams?",
+      "answer": "It lets multiple developers work on the same codebase without overwriting each other, keeps a full history of changes, enables code review through pull requests and makes it easy to revert buggy changes.",
+      "intent": "code"
+    },
+    {
+      "question": "What is the difference between a compiler and an interpreter in Python specifically?",
+      "answer": "CPython compiles your source to bytecode (.pyc) and then interprets that bytecode. So Python is described as interpreted, but there is a compilation step. This design gives portability across platforms.",
+      "intent": "code"
+    }
+  ]
+}
