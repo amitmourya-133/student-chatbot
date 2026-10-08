@@ -13,10 +13,8 @@ model and the offline knowledge base.  Nothing here requires the internet.
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import os
-import random
 import sys
 from pathlib import Path
 from typing import Optional
@@ -29,11 +27,7 @@ import config
 from features import commands as command_utils
 from features import planner as planner_feature
 from features import quiz as quiz_feature
-from nlp.classifier import IntentClassifier
-from services.chat_history import ChatHistory
-from services.gemini import GeminiError, generate_response
-from services.internet import is_online
-from services.knowledge_base import NO_MATCH_MESSAGE, KnowledgeBase
+from services.pipeline import AssistantPipeline
 from utils.logger import setup_logging
 
 logger = logging.getLogger("chatbot")
@@ -100,76 +94,78 @@ class StudentChatbot:
     # startup
     # ------------------------------------------------------------------ #
     def __init__(self, force_offline: bool = False) -> None:
-        self.force_offline = force_offline
-        self.classifier = IntentClassifier()
-        self.kb = KnowledgeBase()
-        self.history = ChatHistory()
-        self.intent_responses: dict[str, list[str]] = {}
-        self.online = False
-        self.online_disabled = False  # flipped after a Gemini failure
+        self.pipeline = AssistantPipeline(force_offline=force_offline)
         self.running = True
         self._pending_exit = False
 
+    # convenient read-only views into the shared pipeline
+    @property
+    def force_offline(self) -> bool:
+        return self.pipeline.force_offline
+
+    @property
+    def online(self) -> bool:
+        return self.pipeline.online
+
+    @property
+    def online_disabled(self) -> bool:
+        return self.pipeline.online_disabled
+
+    @property
+    def classifier(self):
+        return self.pipeline.classifier
+
+    @property
+    def kb(self):
+        return self.pipeline.kb
+
+    @property
+    def history(self):
+        return self.pipeline.history
+
+    @property
+    def intent_responses(self) -> dict[str, list[str]]:
+        return self.pipeline.intent_responses
+
     def validate_directories(self) -> None:
-        for path in (config.DATA_DIR, config.MODELS_DIR):
-            try:
-                path.mkdir(parents=True, exist_ok=True)
-            except Exception:
-                logger.warning("Could not create directory %s", path)
+        self.pipeline.validate_directories()
 
     def load_intent_responses(self) -> None:
-        try:
-            with open(config.INTENTS_FILE, "r", encoding="utf-8") as handle:
-                data = json.load(handle)
-            for intent in data.get("intents", []):
-                tag = intent.get("tag")
-                responses = intent.get("responses") or []
-                if tag and responses:
-                    self.intent_responses[tag] = responses
-        except Exception:
-            logger.warning("Could not load canned intent responses")
+        self.pipeline.load_intent_responses()
 
     def startup(self) -> None:
         """Validate everything and prepare the runtime. Never raises."""
-        self.validate_directories()
         logger.info("Starting %s", config.BOT_NAME)
         logger.info("Config: %s", config.summary())
+        status = self.pipeline.startup()
 
-        if not self.classifier.ensure_ready():
+        if not status.intent_model:
             print(
                 paint("\n⚠️  Intent model not found and training failed.\n", YELLOW)
                 + "Run:\n"
                 + paint("    python nlp/train.py", BOLD)
                 + "\n"
             )
-        if not self.kb.load():
+        if not status.knowledge_base:
             print(
                 paint(
                     "\n⚠️  Offline knowledge base could not be loaded.\n", YELLOW
                 )
                 + f"Check that {config.KNOWLEDGE_BASE_FILE} exists and is valid JSON.\n"
             )
-        self.load_intent_responses()
 
         if not config.has_api_key() and not self.force_offline:
             logger.info("No Gemini API key configured - offline only")
 
-        self.refresh_mode(initial=True)
-
     def refresh_mode(self, initial: bool = False) -> bool:
         """Re-check connectivity and update ``self.online``."""
         previous = self.online
-        if self.force_offline or self.online_disabled:
-            available = False
-        else:
-            available = is_online() and config.has_api_key()
-
-        self.online = available
-        if not initial and previous != self.online:
+        available = self.pipeline.refresh_mode(initial=initial)
+        if not initial and previous != available:
             logger.info("Mode changed -> %s", self.mode_label())
             print()
             print(self.mode_line())
-        return self.online
+        return available
 
     # ------------------------------------------------------------------ #
     # display helpers
@@ -206,75 +202,18 @@ class StudentChatbot:
         print("Type " + paint("/help", BOLD) + " for commands.")
         print()
 
-    # ------------------------------------------------------------------ #
-    # offline pipeline
-    # ------------------------------------------------------------------ #
-    def offline_reply(self, text: str) -> str:
-        """Intent -> knowledge base -> canned response -> fallback."""
-        prediction = self.classifier.predict(text)
-        intent = prediction.get("intent", "fallback")
-        confidence = prediction.get("confidence", 0.0)
-        logger.debug("intent=%s confidence=%.2f input=%r", intent, confidence, text)
-
-        match = self.kb.find_answer(text, intent_hint=intent)
-        if match is not None:
-            return match.answer
-
-        responses = self.intent_responses.get(intent)
-        if intent != "fallback" and responses:
-            return random.choice(responses)
-
-        fallback_responses = self.intent_responses.get("fallback")
-        if fallback_responses:
-            return random.choice(fallback_responses)
-        return NO_MATCH_MESSAGE
-
-    def online_reply(self, text: str) -> str:
-        pairs: list[dict] = []
-        for entry in self.history.recent(limit=10):
-            if entry.get("user"):
-                pairs.append({"role": "user", "content": str(entry["user"])})
-            if entry.get("assistant"):
-                pairs.append(
-                    {"role": "assistant", "content": str(entry["assistant"])}
-                )
-        return generate_response(text, pairs)
-
     def get_reply(self, text: str) -> tuple[str, str]:
         """Return ``(reply, mode)`` - never raises."""
-        if self.online:
-            try:
-                return self.online_reply(text), "online"
-            except GeminiError as exc:
-                logger.warning("Gemini unavailable: %s", exc)
-                print(
-                    paint(
-                        "⚠️ Online AI unavailable. Switching to offline mode.",
-                        YELLOW,
-                    )
+        result = self.pipeline.reply(text)
+        if result.just_switched:
+            print(
+                paint(
+                    "⚠️ Online AI unavailable. Switching to offline mode.",
+                    YELLOW,
                 )
-                self.online_disabled = True
-                self.online = False
-                print(self.mode_line())
-            except Exception:
-                logger.exception("Unexpected online failure")
-                print(
-                    paint(
-                        "⚠️ Online AI unavailable. Switching to offline mode.",
-                        YELLOW,
-                    )
-                )
-                self.online_disabled = True
-                self.online = False
-        try:
-            return self.offline_reply(text), "offline"
-        except Exception:
-            logger.exception("Offline pipeline failed")
-            return (
-                "Sorry, something went wrong while processing that. "
-                "Please try again.",
-                "offline",
             )
+            print(self.mode_line())
+        return result.text, ("online" if result.online else "offline")
 
     # ------------------------------------------------------------------ #
     # interactive features
