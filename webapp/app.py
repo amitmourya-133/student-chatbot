@@ -187,11 +187,11 @@ async def pdf_extract():
 async def mode_switch(enable_online: bool = False):
     global pipeline
     try:
-        if enable_online:
-            # Initialize with Gemini online mode
-            pipeline = AssistantPipeline(force_offline=False)
-        else:
-            pipeline = AssistantPipeline(force_offline=True)
+        # Build a pipeline for the requested mode and run startup() so the
+        # online/offline decision is actually evaluated. (force_offline alone
+        # does not set the mode - refresh_mode(), called by startup(), does.)
+        pipeline = AssistantPipeline(force_offline=not enable_online)
+        pipeline.startup()
         return {"mode": pipeline.mode, "success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Mode switch error: {str(e)}")

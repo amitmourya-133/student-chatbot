@@ -15,7 +15,8 @@
     </aside>
     <main class="main" aria-label="Main content">
       <header class="top-bar">
-        <span class="mode-indicator" id="mode-indicator">Offline</span>
+        <button class="mode-indicator" id="mode-indicator" type="button"
+                title="Click to toggle Online (Gemini) / Offline mode">Offline</button>
       </header>
       <section class="messages" id="chat-messages">
         <div id="welcome" style="display: block; width: 100%; padding: 2rem; text-align: center; color: var(--text);">
@@ -39,6 +40,34 @@
     const messageInput = document.getElementById('message-input');
     const sendBtn = document.getElementById('send-btn');
     const modeIndicator = document.getElementById('mode-indicator');
+
+    let currentMode = 'offline';
+
+    function setModeLabel(mode) {
+      currentMode = mode === 'online' ? 'online' : 'offline';
+      modeIndicator.textContent = currentMode === 'online' ? 'Online' : 'Offline';
+      modeIndicator.classList.toggle('online', currentMode === 'online');
+    }
+
+    function initMode() {
+      fetch('/api/status')
+        .then(res => (res.ok ? res.json() : null))
+        .then(data => { if (data && data.mode) setModeLabel(data.mode); })
+        .catch(() => {});
+    }
+
+    function toggleMode() {
+      const wantOnline = currentMode !== 'online';
+      modeIndicator.disabled = true;
+      fetch('/mode/switch?enable_online=' + (wantOnline ? 'true' : 'false'), { method: 'POST' })
+        .then(res => (res.ok ? res.json() : Promise.reject(new Error('HTTP ' + res.status))))
+        .then(data => { setModeLabel(data && data.mode ? data.mode : 'offline'); })
+        .catch(() => { setModeLabel(currentMode); })
+        .finally(() => { modeIndicator.disabled = false; });
+    }
+
+    modeIndicator.addEventListener('click', toggleMode);
+    initMode();
 
     function sendMessage() {
       if (sending) return;
@@ -83,6 +112,7 @@
         return res.json();
       })
       .then(data => {
+        if (data && data.mode) setModeLabel(data.mode);
         const text = data && typeof data.response === 'string' ? data.response.trim() : '';
         if (!text) {
           chatMessages.push({

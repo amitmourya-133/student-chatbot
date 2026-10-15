@@ -53,8 +53,14 @@ body {
 }
 
 .mode-indicator {
-  font-size: .8rem; color: #6c757d;
+  font-size: .8rem; color: #6c757d; cursor: pointer;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 999px; padding: .25rem .75rem;
+  transition: background .15s, color .15s, border-color .15s;
 }
+.mode-indicator:hover { background: var(--bg); }
+.mode-indicator.online { color: #1a7f37; border-color: #1a7f37; }
+.mode-indicator:disabled { opacity: .6; cursor: default; }
 
 .messages {
   flex: 1; padding: 1rem 1.5rem; overflow-y: auto; display: flex;

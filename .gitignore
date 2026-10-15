@@ -22,3 +22,6 @@ reports/
 
 # Vercel
 .vercel/
+
+.vercel
+.env*
