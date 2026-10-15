@@ -4,8 +4,22 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
-models/*.pkl
 data/chat_log.json
+data/memory.json
+data/web_launcher.port
 *.log
+logs/
 .idea/
 .vscode/
+
+# Local build outputs / packaging artifacts (never push these)
+build/
+dist/
+*.bak
+
+# Local verification reports (generated)
+reports/
+
+# Vercel
+.vercel/
+.vercelignore

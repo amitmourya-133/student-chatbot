@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student AI Assistant</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+  <div id="root">
+    <aside class="sidebar" aria-label="Sidebar">
+      <h2>Student AI</h2>
+      <button onclick="newChat()" aria-label="New chat">+</button>
+      <div class="chat-nav">Chats</div>
+    </aside>
+    <main class="main" aria-label="Main content">
+      <header class="top-bar">
+        <span class="mode-indicator" id="mode-indicator">Offline</span>
+      </header>
+      <section class="messages" id="chat-messages">
+        <div id="welcome" style="display: block; width: 100%; padding: 2rem; text-align: center; color: var(--text);">
+          <p>Welcome to Student AI Assistant</p>
+          <p>Your personal study assistant</p>
+        </div>
+        <div id="chat-messages-list" style="display: none; flex: 1;"></div>
+      </section>
+      <footer class="composer">
+        <textarea class="compose-input" id="message-input" placeholder="Type a message..." rows="1" aria-label="Message input"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()" aria-label="Send message">→</button>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    let chatMessages = [];
+    let sending = false;
+    const welcomeDiv = document.getElementById('welcome');
+    const chatMessagesList = document.getElementById('chat-messages-list');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const modeIndicator = document.getElementById('mode-indicator');
+
+    function sendMessage() {
+      if (sending) return;
+
+      let msg = messageInput.value.trim();
+      if (!msg) return;
+
+      sending = true;
+      sendBtn.disabled = true;
+      sendBtn.classList.add('disabled');
+
+      // Remove only a pending/error assistant placeholder from a prior failed send
+      if (
+        chatMessages.length > 0 &&
+        chatMessages[chatMessages.length - 1].role === 'assistant' &&
+        chatMessages[chatMessages.length - 1].error
+      ) {
+        chatMessages.pop();
+      }
+
+      msg = messageInput.value.trim();
+      if (!msg) {
+        sending = false;
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('disabled');
+        return;
+      }
+
+      chatMessages.push({ role: 'user', content: msg });
+      messageInput.value = '';
+      renderMessages();
+
+      fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('HTTP ' + res.status);
+        }
+        return res.json();
+      })
+      .then(data => {
+        const text = data && typeof data.response === 'string' ? data.response.trim() : '';
+        if (!text) {
+          chatMessages.push({
+            role: 'assistant',
+            content: 'The assistant returned an empty response. Please try again.',
+            error: true
+          });
+          renderMessages();
+          sending = false;
+          sendBtn.disabled = false;
+          sendBtn.classList.remove('disabled');
+          return;
+        }
+        chatMessages.push({ role: 'assistant', content: text });
+        renderMessages();
+        sending = false;
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('disabled');
+      })
+      .catch(err => {
+        console.error('Chat error:', err);
+        chatMessages.push({ role: 'assistant', content: 'Error: Could not reach server', error: true });
+        renderMessages();
+        sending = false;
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('disabled');
+      });
+    }
+
+    function renderMessages() {
+      // remember whether the user is already reading the latest messages so a
+      // new response does not yank their scroll position when they scrolled up
+      const container = document.getElementById('chat-messages');
+      const nearBottom = container.scrollHeight - container.clientHeight - container.scrollTop < 24;
+      const lastIsUser = chatMessages.length > 0 && chatMessages[chatMessages.length - 1].role === 'user';
+
+      chatMessagesList.innerHTML = '';
+      chatMessagesList.style.display = 'flex';
+      welcomeDiv.style.display = 'none';
+
+      chatMessages.forEach((m, i) => {
+        const div = document.createElement('div');
+        div.className = `message ${m.role}`;
+        div.textContent = m.content;
+        chatMessagesList.appendChild(div);
+      });
+
+      // the .messages section is the scroll container (overflow-y: auto).
+      // auto-scroll only when already at the bottom or the user just sent a
+      // message; otherwise preserve the manual scroll position
+      if (nearBottom || lastIsUser) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    function newChat() {
+      chatMessages = [];
+      sending = false;
+      renderMessages();
+    }
+
+    // Initialize
+    renderMessages();
+
+    // Enter key: send on Enter, newline on Shift+Enter
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (e.shiftKey) {
+          // Insert newline
+          const start = messageInput.selectionStart;
+          const end = messageInput.selectionEnd;
+          const text = messageInput.value;
+          messageInput.value =
+            text.substring(0, start) + '\n' + text.substring(end);
+          messageInput.selectionStart = messageInput.selectionEnd = start + 1;
+          e.preventDefault();
+        } else {
+          // Send message
+          e.preventDefault();
+          sendMessage();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

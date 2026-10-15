@@ -11,6 +11,8 @@ COMMANDS: dict[str, str] = {
     "/quiz": "Start a quiz",
     "/planner": "Create a study plan",
     "/history": "Show recent chat history",
+    "/memory": "Show / enable / disable conversation memory",
+    "/forget": "Forget a remembered fact (e.g. /forget name)",
     "/mode": "Show current mode",
     "/clear": "Clear the screen",
     "/exit": "Exit the chatbot",

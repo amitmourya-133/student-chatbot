@@ -23,7 +23,7 @@ missing - it degrades gracefully to offline mode.
 - 🕘 **Chat History** (`/history`) - saved to `data/chat_log.json`, corruption-safe
 - 🌏 **Hinglish support** - `python kya hai`, `quiz start karo`, `study plan bana do`
 - 🛡️ Error handling everywhere: bad JSON, missing files, API errors, invalid input
-- 🧪 Test suite: 93 tests (`pytest`)
+- 🧪 Test suite: 177 tests (`pytest`)
 
 ## Project structure
 
@@ -38,7 +38,7 @@ student-chatbot/
 │   ├── offline_kb.json     # 215 offline Q&A entries
 │   └── chat_log.json       # created automatically
 ├── models/
-│   ├── intent_model.pkl    # created by training
+│   ├── intent_model.pkl    # prebuilt (shipped) or created by training
 │   └── vectorizer.pkl
 ├── nlp/
 │   ├── preprocessing.py    # text normalisation
@@ -221,7 +221,32 @@ python -m pytest
 ```
 
 Covers preprocessing, intent prediction, KB matching and the similarity
-threshold, command parsing, exit handling, quiz scoring and chat history.
+threshold, command parsing, exit handling, quiz scoring, chat history, and the
+concurrency safeguards for the shared JSON stores (atomic writes + file locks).
+
+## Windows EXE
+
+A console EXE (plus a local web-app launcher EXE) can be built on Windows
+without any framework beyond PyInstaller:
+
+```powershell
+pip install -r requirements.txt pyinstaller
+python scripts/build_exe.py
+```
+
+Output:
+
+```text
+dist\StudentAIAssistant\StudentAIAssistant.exe        # interactive CLI
+dist\StudentAIAssistantWeb\StudentAIAssistantWeb.exe  # local web app on 127.0.0.1
+```
+
+The bundled app keeps all immutable assets (models, intents, offline KB,
+templates, static files) read-only inside the package and writes user data
+(memory, chat history, progress, uploaded PDFs) to
+`%LOCALAPPDATA%\StudentAIAssistant\`. It never embeds `.env`, API keys or chat
+logs in the EXE. See **BUILD_WINDOWS.md** for details, API-key setup, offline
+running and troubleshooting (DLLs, permissions, antivirus false positives).
 
 ## Troubleshooting
 
@@ -237,5 +262,7 @@ threshold, command parsing, exit handling, quiz scoring and chat history.
 ## Security
 
 - `GEMINI_API_KEY` is read from the environment only - never hardcoded
-- `.env` and `models/*.pkl` are git-ignored
+- `.env` and all user data (`memory.json`, `chat_log.json`, logs) are git-ignored
+- The small prebuilt intent model ships in `models/` for portable/read-only
+  deployments; if it is removed the app retrains automatically at startup
 - API keys, stack traces and raw HTTP bodies are never printed to the user

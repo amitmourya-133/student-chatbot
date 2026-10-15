@@ -17,7 +17,7 @@ def offline_pipeline(tmp_path, monkeypatch):
     patch = tmp_path / "chat_log.json"
     patch.write_text("[]", encoding="utf-8")
     monkeypatch.setattr(pipeline_mod.config, "CHAT_LOG_FILE", patch)
-    pipe = AssistantPipeline(force_offline=True)
+    pipe = AssistantPipeline(force_offline=True, memory_path=tmp_path / "memory.json")
     return pipe
 
 
@@ -47,7 +47,7 @@ def test_empty_reply_never_raises(offline_pipeline):
 def test_online_success_sets_gemini_source(offline_pipeline, monkeypatch):
     offline_pipeline.online = True
     monkeypatch.setattr(
-        pipeline_mod, "generate_response", lambda msg, hist: "online answer"
+        pipeline_mod, "generate_response", lambda msg, hist, system_instruction=None: "online answer"
     )
     result = offline_pipeline.reply("hello")
     assert result.online is True
@@ -59,7 +59,7 @@ def test_online_success_sets_gemini_source(offline_pipeline, monkeypatch):
 def test_gemini_error_falls_back_gracefully(offline_pipeline, monkeypatch):
     offline_pipeline.online = True
 
-    def boom(msg, hist):
+    def boom(msg, hist, system_instruction=None):
         raise GeminiError("The online AI service is having problems.")
 
     monkeypatch.setattr(pipeline_mod, "generate_response", boom)
@@ -73,7 +73,7 @@ def test_gemini_error_falls_back_gracefully(offline_pipeline, monkeypatch):
 def test_unexpected_online_error_falls_back(offline_pipeline, monkeypatch):
     offline_pipeline.online = True
 
-    def boom(msg, hist):
+    def boom(msg, hist, system_instruction=None):
         raise RuntimeError("boom")
 
     monkeypatch.setattr(pipeline_mod, "generate_response", boom)
@@ -97,7 +97,7 @@ def test_online_disabled_is_latched(offline_pipeline, monkeypatch):
 def test_online_history_pairs_includes_recent(offline_pipeline, monkeypatch):
     captured = {}
 
-    def fake_generate(msg, hist):
+    def fake_generate(msg, hist, system_instruction=None):
         captured["hist"] = hist
         return "ok"
 
@@ -114,7 +114,7 @@ def test_root_of_generate_online_uses_real_service(offline_pipeline, monkeypatch
     sentinel = {"used": False}
     real = pipeline_mod.generate_response
 
-    def spy(msg, hist):
+    def spy(msg, hist, system_instruction=None):
         sentinel["used"] = True
         return real(msg, hist) if False else "spy"
 
@@ -138,3 +138,80 @@ def test_force_offline_never_goes_online(monkeypatch):
     pipe = AssistantPipeline(force_offline=True)
     pipe.refresh_mode(initial=True)
     assert pipe.online is False
+
+
+def test_chat_endpoint_returns_valid_response():
+    """Regression test: verify /api/chat endpoint returns 200 with valid response.
+
+    Original bug: pipeline.pipeline.reply() caused AttributeError (HTTP 500)
+    because AssistantPipeline has no .pipeline attribute.
+    Fixed: changed to pipeline.reply() in webapp/app.py.
+    """
+    from fastapi.testclient import TestClient
+    from webapp.app import app
+
+    client = TestClient(app)
+
+    # Test that chat endpoint returns 200 (not 500)
+    resp = client.post("/api/chat", json={"message": "hello"})
+    assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.json()}"
+
+    # Test that response has a non-empty "response" field
+    data = resp.json()
+    assert "response" in data, "Response JSON missing 'response' key"
+    assert data["response"].strip(), "Response should not be empty"
+
+    # Test that mode is included
+    assert "mode" in data, "Response JSON missing 'mode' key"
+
+    # Test with a content question
+    resp2 = client.post("/api/chat", json={"message": "what is python"})
+    assert resp2.status_code == 200
+    data2 = resp2.json()
+    assert data2["response"].strip(), "Response should not be empty"
+
+
+def test_memory_history_failure_does_not_cause_false_error():
+    """The web chat endpoint stays healthy when persistence backends are present.
+
+    Negative control for the CLI false-error fix: /api/chat does not persist
+    history or memory, so it must return a normal 200 answer. True
+    persistence-failure coverage lives in tests/test_cli_fix.py.
+    """
+    from fastapi.testclient import TestClient
+    from webapp.app import app
+
+    client = TestClient(app)
+    resp = client.post("/api/chat", json={"message": "test"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["response"].strip(), "Response should not be empty"
+
+
+def test_one_input_one_response():
+    """Verify one user input produces exactly one assistant response.
+
+    Regression guard: a frontend bug previously rendered the same assistant
+    answer repeatedly. This ensures the backend never returns stacked copies
+    of the same content for a single request.
+    """
+    from fastapi.testclient import TestClient
+    from webapp.app import app
+
+    client = TestClient(app)
+    resp1 = client.post("/api/chat", json={"message": "hello"})
+    assert resp1.status_code == 200
+    resp2 = client.post("/api/chat", json={"message": "world"})
+    assert resp2.status_code == 200
+    data1 = resp1.json()
+    data2 = resp2.json()
+    assert data1["response"].strip(), "First response should not be empty"
+    assert data2["response"].strip(), "Second response should not be empty"
+
+    for label, data in (("first", data1), ("second", data2)):
+        text = data["response"].strip()
+        if len(text) >= 6:
+            half = len(text) // 2
+            assert text[:half] != text[half : 2 * half], (
+                f"{label} response contains duplicated stacked content"
+            )

@@ -1,0 +1,104 @@
+/* Student AI Assistant - ChatGPT style */
+:root {
+  --bg: #f8f9fa;
+  --bg-dark: #212529;
+  --text: #212529;
+  --text-dark: #f8f9fa;
+  --accent: #007bff;
+  --accent-dark: #005fcc;
+  --card: #ffffff;
+  --card-dark: #343a40;
+  --border: #dee2e6;
+  --border-dark: #495057;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0; height: 100vh; display: flex;
+}
+
+.light-mode { --bg: #f8f9fa; --bg-dark: #212529; --text: #212529; --text-dark: #f8f9fa; --card: #ffffff; --border: #dee2e6; }
+.dark-mode { --bg: #212529; --bg-dark: #141619; --text: #f8f9fa; --text-dark: #212529; --card: #343a40; --border: #495057; }
+
+#root { width: 100%; height: 100%; display: flex; }
+
+.sidebar {
+  width: 60px; min-height: 100vh; background: var(--bg-dark);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding: 1rem 0; color: var(--text-dark);
+}
+
+.sidebar h2 {
+  font-size: 1.2rem; margin-bottom: 2rem; color: var(--text-dark);
+  width: 32px; text-align: center; white-space: nowrap;
+}
+
+.sidebar button {
+  width: 32px; height: 32px; background: none; border: none;
+  color: var(--text-dark); margin-bottom: .5rem; cursor: pointer;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+
+.sidebar button:hover { background: var(--card); }
+
+.chat-nav { font-size: .7rem; opacity: 0.6; margin-top: auto; }
+
+.main { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 0; }
+
+.top-bar {
+  padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--card); color: var(--text);
+}
+
+.mode-indicator {
+  font-size: .8rem; color: #6c757d;
+}
+
+.messages {
+  flex: 1; padding: 1rem 1.5rem; overflow-y: auto; display: flex;
+  flex-direction: column; gap: .5rem; min-width: 0; min-height: 0;
+}
+
+#chat-messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+}
+
+.message {
+  max-width: 70%; padding: .75rem 1rem; border-radius: 12px; font-size: .9rem;
+  line-height: 1.4; position: relative; word-wrap: break-word; min-width: 0;
+  overflow-wrap: break-word;
+}
+.message.user { align-self: flex-end; background: var(--accent); color: white; }
+.message.assistant { align-self: flex-start; background: var(--card); color: var(--text); }
+
+.composer {
+  padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: var(--card);
+  display: flex; gap: .5rem; }
+
+.compose-input {
+  flex: 1; padding: .6rem .8rem; border: 1px solid var(--border);
+  border-radius: 20px; font-size: .9rem; outline: none;
+  min-width: 0; resize: none; max-height: 120px;
+}
+
+.compose-input:focus { border-color: var(--accent); }
+
+.send-btn {
+  width: 36px; height: 36px; border: none; border-radius: 50%;
+  background: var(--accent); color: white; cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center; }
+.send-btn:hover { background: var(--accent-dark); }
+
+@media (max-width: 600px) {
+  .sidebar { display: none; }
+  .message { max-width: 90%; }
+  .messages { padding: .75rem .75rem; }
+  .composer { padding: .75rem .75rem; }
+}

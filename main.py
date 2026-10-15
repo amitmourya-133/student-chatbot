@@ -28,6 +28,15 @@ from features import commands as command_utils
 from features import planner as planner_feature
 from features import quiz as quiz_feature
 from services.pipeline import AssistantPipeline
+from services.response_policy import (
+    STUDY_MODES,
+    LANGUAGES,
+    STYLES,
+    valid_study_modes,
+    valid_languages,
+    valid_styles,
+    study_mode_label,
+)
 from utils.logger import setup_logging
 
 logger = logging.getLogger("chatbot")
@@ -122,6 +131,10 @@ class StudentChatbot:
     @property
     def history(self):
         return self.pipeline.history
+
+    @property
+    def memory(self):
+        return self.pipeline.memory
 
     @property
     def intent_responses(self) -> dict[str, list[str]]:
@@ -380,11 +393,56 @@ class StudentChatbot:
             print(paint(command_utils.help_text(), CYAN))
             return True
         if name == "/mode":
-            print(self.mode_line())
-            if self.online:
-                print(f"   Model: {config.GEMINI_MODEL}")
+            if args:
+                mode_name = args.strip().lower()
+                if mode_name in STUDY_MODES:
+                    self.pipeline.study_mode = mode_name
+                    print(paint(f"Mode set to {study_mode_label(mode_name)}.", BOLD))
+                else:
+                    print(
+                        paint(
+                            f"Unknown mode. Valid: {', '.join(valid_study_modes())}",
+                            YELLOW,
+                        )
+                    )
             else:
-                print("   Engine: TF-IDF + Naive Bayes + offline KB")
+                print(self.mode_line())
+                if self.online:
+                    print(f"   Model: {config.GEMINI_MODEL}")
+                else:
+                    print("   Engine: TF-IDF + Naive Bayes + offline KB")
+            return True
+        if name == "/lang":
+            if args:
+                lang = args.strip().lower()
+                if lang in LANGUAGES:
+                    self.pipeline.language = lang
+                    print(paint(f"Language set to {lang}.", BOLD))
+                else:
+                    print(
+                        paint(
+                            f"Unknown language. Valid: {', '.join(valid_languages())}",
+                            YELLOW,
+                        )
+                    )
+            else:
+                print("Current language:", self.pipeline.language)
+            return True
+        if name == "/style":
+            if args:
+                style = args.strip().lower()
+                if style in STYLES:
+                    self.pipeline.style = style
+                    print(paint(f"Style set to {style}.", BOLD))
+                else:
+                    print(
+                        paint(
+                            f"Unknown style. Valid: {', '.join(valid_styles())}",
+                            YELLOW,
+                        )
+                    )
+            else:
+                print("Current style:", self.pipeline.style)
             return True
         if name == "/clear":
             clear_screen()
@@ -403,9 +461,182 @@ class StudentChatbot:
                 return True
             self.run_planner()
             return True
+        if name == "/memory":
+            self.show_memory(args)
+            return True
+        if name == "/forget":
+            self.forget_fact(args)
+            return True
+        if name == "/pdf":
+            if not args:
+                print(paint("PDF commands:", BOLD))
+                print("  /pdf open <path>   - Load a PDF from a local path")
+                print("  /pdf info        - Show active PDF info (pages, char count)")
+                print("  /pdf ask <q>     - Ask a question using PDF content")
+                print("  /pdf extract     - Show extracted text")
+                print("  /pdf close       - Clear active PDF session")
+                return True
+            parts = args.strip().split(None, 1)
+            cmd = parts[0].lower()
+            rest = parts[1] if len(parts) > 1 else ""
+            if cmd == "open":
+                self.pdf_open(rest)
+            elif cmd == "info":
+                self.pdf_info()
+            elif cmd == "ask":
+                self.pdf_ask(rest)
+            elif cmd == "extract":
+                self.pdf_extract()
+            elif cmd == "close":
+                self.pdf_close()
+            elif cmd == "help":
+                self.pdf_help()
+            else:
+                print(command_utils.unknown_command_message(args))
+            return True
 
         print(command_utils.unknown_command_message(text))
         return True
+
+    # ------------------------------------------------------------------ #
+    # conversation memory commands
+    # ------------------------------------------------------------------ #
+    def show_memory(self, args: str) -> None:
+        action = args.strip().lower()
+
+        if action in ("on", "enable", "1"):
+            self.memory.set_enabled(True)
+            print(paint("Memory enabled.", BOLD))
+            return
+        if action in ("off", "disable", "0"):
+            self.memory.set_enabled(False)
+            print(paint("Memory disabled and cleared.", BOLD))
+            return
+        if action == "clear":
+            self.memory.clear()
+            print(paint("Memory cleared.", BOLD))
+            return
+
+        print(paint("MEMORY", BOLD))
+        print(f"  status      : {'enabled' if not self.memory.disabled else 'disabled'}")
+        facts = self.memory.facts_dict()
+        if facts:
+            print("  remembered  :")
+            for key, value in facts.items():
+                print(f"      {key}: {value}")
+        else:
+            print("  remembered  : (nothing yet)")
+        session = self.memory.recent_context()
+        if session:
+            print("  last context:")
+            for line in session[-4:]:
+                print(f"      {line[:80]}")
+        if facts or session:
+            print("  tip         : say 'my name is ..', 'my subject is ..' to teach me")
+            print("               or use /forget <key> to remove one fact")
+
+    def forget_fact(self, args: str) -> None:
+        key = args.strip().lower()
+        if not key:
+            print("Usage: /forget <name|subject|branch|semester|year|college>")
+            return
+        if self.memory.delete_fact(key):
+            print(paint(f"Forgot {key}.", BOLD))
+        else:
+            print(f"There is no remembered value for '{key}'.")
+
+    # ------------------------------------------------------------------ #
+    # PDF assistant commands
+    # ------------------------------------------------------------------ #
+    def pdf_open(self, path: str = "") -> None:
+        """Load a PDF from a local file path."""
+        if not path:
+            print("Usage: /pdf open <path>")
+            return
+        import os
+        if not os.path.exists(path):
+            print(f"Error: PDF file not found at '{path}'")
+            return
+        if not path.lower().endswith('.pdf'):
+            print("Error: File must have .pdf extension")
+            return
+        try:
+            result = self.pipeline.load_pdf(path)
+            if result.get("status") == "success":
+                self._active_pdf = {
+                    "path": path,
+                    "pages": result.get("pages", 0),
+                    "char_count": result.get("text_length", 0),
+                    "subject_hints": result.get("subject_hints", []),
+                }
+                print(f"PDF loaded: {result.get('pages', 0)} pages, {result.get('text_length', 0)} characters")
+                print(f"Subject hints: {', '.join(result.get('subject_hints', [])) or 'None'}")
+            else:
+                print(f"Error loading PDF: {result.get('status', 'unknown error')}")
+        except Exception as exc:
+            print(f"Error loading PDF: {exc}")
+
+    def pdf_info(self) -> None:
+        """Show active PDF metadata."""
+        if not hasattr(self, "_active_pdf") or self._active_pdf is None:
+            print("No active PDF session. Use /pdf open <path> first.")
+            return
+        pdf = self._active_pdf
+        print(f"Active PDF: {pdf['path']}")
+        print(f"Pages: {pdf['pages']}")
+        print(f"Extracted characters: {pdf['char_count']}")
+        if pdf.get("subject_hints"):
+            print(f"Subject hints: {', '.join(pdf['subject_hints'])}")
+        else:
+            print("Subject hints: None")
+
+    def pdf_ask(self, question: str) -> None:
+        """Ask a question using the active PDF content."""
+        if not hasattr(self, "_active_pdf") or self._active_pdf is None:
+            print("No active PDF session. Use /pdf open <path> first.")
+            return
+        if not question.strip():
+            print("Usage: /pdf ask <question>")
+            return
+        response = self.pipeline.query_pdf(question)
+        print(f"PDF query: {response}")
+
+    def pdf_extract(self) -> None:
+        """Show extracted text from the active PDF."""
+        if not hasattr(self, "_active_pdf") or self._active_pdf is None:
+            print("No active PDF session. Use /pdf open <path> first.")
+            return
+        pdf = self._active_pdf
+        # Show a summary, not the entire text (could be very long)
+        print(f"PDF extracted text summary ({pdf['char_count']} characters):")
+        print(f"  First 200 chars: {pdf.get('text_summary', 'N/A')[:200]}")
+        print(f"  Total characters: {pdf['char_count']}")
+        print(f"  Subject hints: {', '.join(pdf.get('subject_hints', [])) or 'None'}")
+        print(f"  Pages: {pdf['pages']}")
+
+    def pdf_close(self) -> None:
+        """Clear the active PDF session."""
+        if hasattr(self, "_active_pdf") and self._active_pdf is not None:
+            self._active_pdf = None
+            print("PDF session cleared.")
+        else:
+            print("No active PDF session to clear.")
+
+    def pdf_help(self) -> None:
+        """Show PDF command help."""
+        print("PDF Assistant Commands:")
+        print("  /pdf open <path>   - Load a PDF from a local path")
+        print("  /pdf info          - Show active PDF metadata (pages, char count)")
+        print("  /pdf ask <question>- Ask a question using active PDF content")
+        print("  /pdf extract       - Show extracted text summary")
+        print("  /pdf close         - Clear the active PDF session")
+        print("  /pdf help          - Show this help message")
+
+    def _extract_text_safe(self, text: str, max_chars: int = 500) -> str:
+        """Safely extract a portion of text, avoiding overly long output."""
+        if not text:
+            return ""
+        return text[:max_chars].rstrip() + ("..." if len(text) > max_chars else "")
 
     # ------------------------------------------------------------------ #
     # main loop
@@ -430,7 +661,14 @@ class StudentChatbot:
         print(paint(f"🤖 Assistant [{icon}]:", BOLD))
         print(reply)
         print()
-        self.history.add(stripped, reply, mode)
+        try:
+            self.history.add(stripped, reply, mode)
+        except Exception:
+            logger.exception("Failed to update conversation history")
+        try:
+            self.memory.record(stripped, reply)
+        except Exception:
+            logger.exception("Failed to record conversation memory")
 
     def run(self) -> None:
         self.show_banner()

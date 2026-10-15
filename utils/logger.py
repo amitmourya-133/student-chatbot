@@ -14,7 +14,7 @@ from pathlib import Path
 
 import config
 
-LOG_DIR = config.BASE_DIR / "logs"
+LOG_DIR = config.LOG_DIR
 LOG_FILE = LOG_DIR / "chatbot.log"
 
 _FORMAT = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"

@@ -1074,6 +1074,31 @@
       "question": "What is the difference between a compiler and an interpreter in Python specifically?",
       "answer": "CPython compiles your source to bytecode (.pyc) and then interprets that bytecode. So Python is described as interpreted, but there is a compilation step. This design gives portability across platforms.",
       "intent": "code"
+    },
+    {
+      "question": "What is Newton's ring?",
+      "answer": "Newton's rings are concentric alternating bright and dark circular fringes seen when a plano-convex lens is placed on a flat glass plate. They are caused by thin-film interference between light reflected from the curved surface of the lens and the flat surface of the plate. They were first described by Isaac Newton and are used to measure lens curvature and the wavelength of light.",
+      "intent": "science"
+    },
+    {
+      "question": "What are Newton's rings?",
+      "answer": "Newton's rings are concentric alternating bright and dark circular fringes seen when a plano-convex lens is placed on a flat glass plate. They are caused by thin-film interference between light reflected from the curved surface of the lens and the flat surface of the plate. They were first described by Isaac Newton and are used to measure lens curvature and the wavelength of light.",
+      "intent": "science"
+    },
+    {
+      "question": "What is the Hindi meaning of phone?",
+      "answer": "The Hindi meaning of phone (फ़ोन) is दूरभाष (doorbhaash) or टेलीफ़ोन (telephone). In everyday Hindi, people often just say 'फ़ोन' (phone). A mobile phone is called 'मोबाइल फ़ोन' (mobile phone) in Hindi.",
+      "intent": "ask"
+    },
+    {
+      "question": "What is the Hindi meaning of telephone?",
+      "answer": "The Hindi meaning of telephone is दूरभाष (doorbhaash) or टेलीफ़ोन (telephone). संक्षेप में इसे फ़ोन (phone) भी कहते हैं।",
+      "intent": "ask"
+    },
+    {
+      "question": "What is sex?",
+      "answer": "Sex refers to the biological and physiological characteristics of an individual, such as chromosomes (for example XX and XY), hormones and reproductive anatomy. In human beings, sex is typically categorised as male, female or intersex. Sex is different from gender, which is a social and cultural role, so a person's sex and gender identity are not the same thing.",
+      "intent": "science"
     }
   ]
 }

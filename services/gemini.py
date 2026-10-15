@@ -83,7 +83,11 @@ def _raise_mapped_sdk_error(exc: Exception) -> None:
     raise GeminiError("The online AI request failed.")
 
 
-def _generate_via_sdk(message: str, history: list[dict]) -> str:
+def _generate_via_sdk(
+    message: str,
+    history: list[dict],
+    system_instruction: Optional[str] = None,
+) -> str:
     # the google-genai SDK takes the request timeout in milliseconds via
     # HttpOptions - generate_content() itself has no timeout parameter
     client = genai_sdk.Client(
@@ -109,7 +113,7 @@ def _generate_via_sdk(message: str, history: list[dict]) -> str:
             model=config.GEMINI_MODEL,
             contents=contents,
             config=genai_types.GenerateContentConfig(
-                system_instruction=config.SYSTEM_PROMPT,
+                system_instruction=system_instruction or config.SYSTEM_PROMPT,
                 temperature=0.7,
                 max_output_tokens=2048,
             ),
@@ -130,7 +134,11 @@ def _generate_via_sdk(message: str, history: list[dict]) -> str:
     return str(text).strip()
 
 
-def _generate_via_rest(message: str, history: list[dict]) -> str:
+def _generate_via_rest(
+    message: str,
+    history: list[dict],
+    system_instruction: Optional[str] = None,
+) -> str:
     # the REST API requires parts as [{"text": ...}] objects, not raw strings
     contents = [
         {
@@ -141,7 +149,9 @@ def _generate_via_rest(message: str, history: list[dict]) -> str:
     ]
     contents.append({"role": "user", "parts": [{"text": message}]})
     payload = {
-        "systemInstruction": {"parts": [{"text": config.SYSTEM_PROMPT}]},
+        "systemInstruction": {
+            "parts": [{"text": system_instruction or config.SYSTEM_PROMPT}]
+        },
         "contents": contents,
         "generationConfig": {"maxOutputTokens": 2048, "temperature": 0.7},
     }
@@ -179,8 +189,12 @@ def _generate_via_rest(message: str, history: list[dict]) -> str:
 def generate_response(
     user_message: str,
     conversation_history: Optional[Iterable[dict]] = None,
+    system_instruction: Optional[str] = None,
 ) -> str:
     """Return an answer from Gemini for ``user_message``.
+
+    ``system_instruction`` replaces the default ``config.SYSTEM_PROMPT`` when
+    provided; ``None`` keeps the current behaviour exactly.
 
     Raises :class:`GeminiError` on any failure so callers can fall back to
     the offline knowledge base.
@@ -194,14 +208,18 @@ def generate_response(
 
     if _SDK_AVAILABLE:
         try:
-            return _generate_via_sdk(user_message.strip(), history)
+            return _generate_via_sdk(
+                user_message.strip(), history, system_instruction
+            )
         except GeminiError:
             raise
         except Exception:
             logger.exception("Unexpected Gemini SDK failure")
 
     try:
-        return _generate_via_rest(user_message.strip(), history)
+        return _generate_via_rest(
+            user_message.strip(), history, system_instruction
+        )
     except GeminiError:
         raise
     except requests.exceptions.Timeout as exc:

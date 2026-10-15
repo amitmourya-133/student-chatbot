@@ -390,6 +390,7 @@ class QuizSession:
     score: int = 0
     answered: int = 0
     history: list[dict] = field(default_factory=list)
+    weak_topics: dict[str, int] = field(default_factory=dict)
 
     @property
     def total(self) -> int:
@@ -418,7 +419,7 @@ class QuizSession:
             lines.append(f"{letter}. {option}")
         return "\n".join(lines)
 
-    def submit(self, answer_text: str) -> dict:
+    def submit(self, answer_text: str, topic: str | None = None) -> dict:
         """Record an answer. ``choice`` may be ``A-D`` or ``1-4``."""
         question = self.current
         if question is None:
@@ -433,6 +434,10 @@ class QuizSession:
         if correct:
             self.score += 1
         self.answered += 1
+
+        # track weak topics (increment miss count for wrong answers)
+        if not correct and topic:
+            self.weak_topics[topic] = self.weak_topics.get(topic, 0) + 1
 
         self.history.append(
             {
@@ -476,6 +481,67 @@ class QuizSession:
             "answered": self.answered,
             "complete": self.is_complete,
         }
+
+    def review_weak(self) -> str:
+        """Re-present missed questions ordered by weakest topic first.
+
+        Prioritises questions from the weakest topics (most misses).
+        If no weak topics, falls back to a normal quiz.
+        If fewer weak-topic questions than requested, fills remaining slots
+        from the normal question pool.
+        Never crashes if a topic does not exist or questions are unavailable.
+        """
+        if not self.weak_topics:
+            return "No missed questions to review."
+        # sort topics by miss count descending
+        sorted_topics = sorted(self.weak_topics.items(), key=lambda x: x[1], reverse=True)
+        # collect question indices that match any weak topic (simple keyword match)
+        asked: set[int] = set()
+        weak_question_indices: list[int] = []
+        for topic, _ in sorted_topics:
+            for qi, q in enumerate(self.questions):
+                if qi in asked:
+                    continue
+                qtext = q["question"].lower()
+                if topic.lower() in qtext:
+                    asked.add(qi)
+                    weak_question_indices.append(qi)
+        # build result lines
+        lines: list[str] = ["Review your weak topics:"]
+        for topic, count in sorted_topics:
+            lines.append(f"- {topic} (missed {count} time{'s' if count > 1 else ''})")
+        if not weak_question_indices:
+            lines.append(
+                "No review questions could be matched to your weak topics."
+            )
+            return "\n".join(lines)
+        # add the weak questions
+        for qi in weak_question_indices:
+            question = self.questions[qi]
+            lines.append(f"\nQuestion (from weak topic):")
+            lines.append(f"Q{qi+1}: {question['question']}")
+            for letter, option in zip(LETTERS, question["options"]):
+                lines.append(f"{letter}. {option}")
+        # if we have fewer weak questions than a full quiz, fill remaining
+        # slots from the unused portion of the original quiz pool
+        used_indices = set(weak_question_indices)
+        remaining_count = min(
+            self.total - len(used_indices), QUESTIONS_PER_QUIZ - len(weak_question_indices)
+        )
+        for qi in range(len(self.questions)):
+            if len(lines) > 80:
+                break
+            if qi in used_indices:
+                continue
+            if remaining_count <= 0:
+                break
+            question = self.questions[qi]
+            lines.append(f"\nQuestion (from quiz pool):")
+            lines.append(f"Q{qi+1}: {question['question']}")
+            for letter, option in zip(LETTERS, question["options"]):
+                lines.append(f"{letter}. {option}")
+            remaining_count -= 1
+        return "\n".join(lines)
 
     @property
     def percentage(self) -> int:

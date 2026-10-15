@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 import config
+from utils.filelock import FileLock, atomic_json_write
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +66,7 @@ class ChatHistory:
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             if not self.path.exists():
-                with open(self.path, "w", encoding="utf-8") as handle:
-                    json.dump([], handle, indent=2, ensure_ascii=False)
+                atomic_json_write(self.path, [])
         except Exception:
             logger.exception("Could not initialise chat log file")
 
@@ -74,8 +74,7 @@ class ChatHistory:
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             payload = self._entries[-config.HISTORY_SAVE_LIMIT:]
-            with open(self.path, "w", encoding="utf-8") as handle:
-                json.dump(payload, handle, indent=2, ensure_ascii=False)
+            atomic_json_write(self.path, payload)
         except Exception:
             logger.exception("Could not write chat log")
 
@@ -89,9 +88,36 @@ class ChatHistory:
             "assistant": str(assistant_reply),
             "mode": str(mode),
         }
-        self._entries.append(entry)
-        self._save()
+        try:
+            # Reload the freshest on-disk log under the lock, then append, so
+            # multiple instances never lose each other's writes.
+            with FileLock(self.path):
+                self._load_unchecked()
+                self._entries.append(entry)
+                self._entries = self._entries[-config.HISTORY_SAVE_LIMIT:]
+                self._save()
+        except Exception:
+            logger.exception("Could not append chat history")
         return entry
+
+    def _load_unchecked(self) -> None:
+        """Reload from disk without touching the current in-memory log."""
+        if not self.path.exists():
+            return
+        try:
+            with open(self.path, "r", encoding="utf-8") as handle:
+                raw = json.load(handle)
+            if isinstance(raw, list):
+                loaded = [e for e in raw if isinstance(e, dict)]
+            elif isinstance(raw, dict) and isinstance(raw.get("messages"), list):
+                loaded = [e for e in raw["messages"] if isinstance(e, dict)]
+            else:
+                loaded = []
+            self._entries = loaded
+        except (json.JSONDecodeError, OSError, ValueError):
+            # Corrupted or unreadable: keep the in-memory copy rather than
+            # wiping valid entries
+            return
 
     def recent(self, limit: int = config.HISTORY_DISPLAY_LIMIT) -> list[dict]:
         if limit <= 0:
