@@ -35,6 +35,7 @@
   <script>
     let chatMessages = [];
     let sending = false;
+    let sendSeq = 0;
     const welcomeDiv = document.getElementById('welcome');
     const chatMessagesList = document.getElementById('chat-messages-list');
     const messageInput = document.getElementById('message-input');
@@ -42,17 +43,29 @@
     const modeIndicator = document.getElementById('mode-indicator');
 
     let currentMode = 'offline';
+    let currentProvider = 'offline';
 
-    function setModeLabel(mode) {
+    function setModeLabel(mode, providerStatus) {
       currentMode = mode === 'online' ? 'online' : 'offline';
+      currentProvider = providerStatus || (currentMode === 'online' ? 'ok' : 'offline');
       modeIndicator.textContent = currentMode === 'online' ? 'Online' : 'Offline';
       modeIndicator.classList.toggle('online', currentMode === 'online');
+      const degraded = currentMode === 'online' &&
+        (currentProvider === 'error' || currentProvider === 'unreachable' || currentProvider === 'unconfigured');
+      modeIndicator.classList.toggle('degraded', degraded);
+      if (degraded) {
+        modeIndicator.title = currentProvider === 'unconfigured'
+          ? 'Online selected, but no API key is configured'
+          : 'Online selected, but the provider is temporarily unavailable';
+      } else {
+        modeIndicator.title = 'Click to toggle Online (Gemini) / Offline mode';
+      }
     }
 
     function initMode() {
       fetch('/api/status')
         .then(res => (res.ok ? res.json() : null))
-        .then(data => { if (data && data.mode) setModeLabel(data.mode); })
+        .then(data => { if (data && data.mode) setModeLabel(data.mode, data.provider_status); })
         .catch(() => {});
     }
 
@@ -61,13 +74,19 @@
       modeIndicator.disabled = true;
       fetch('/mode/switch?enable_online=' + (wantOnline ? 'true' : 'false'), { method: 'POST' })
         .then(res => (res.ok ? res.json() : Promise.reject(new Error('HTTP ' + res.status))))
-        .then(data => { setModeLabel(data && data.mode ? data.mode : 'offline'); })
-        .catch(() => { setModeLabel(currentMode); })
+        .then(data => { setModeLabel(data && data.mode ? data.mode : 'offline', data && data.provider_status); })
+        .catch(() => { setModeLabel(currentMode, currentProvider); })
         .finally(() => { modeIndicator.disabled = false; });
     }
 
     modeIndicator.addEventListener('click', toggleMode);
     initMode();
+
+    function finishSending() {
+      sending = false;
+      sendBtn.disabled = false;
+      sendBtn.classList.remove('disabled');
+    }
 
     function sendMessage() {
       if (sending) return;
@@ -100,6 +119,7 @@
       messageInput.value = '';
       renderMessages();
 
+      const seq = ++sendSeq;
       fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -112,7 +132,15 @@
         return res.json();
       })
       .then(data => {
-        if (data && data.mode) setModeLabel(data.mode);
+        if (seq !== sendSeq) return;
+        setModeLabel(data && data.mode ? data.mode : currentMode, data && data.provider_status);
+        if (data && data.fallback_used) {
+          chatMessages.push({
+            role: 'assistant',
+            note: true,
+            content: (data.error ? data.error + ' ' : '') + 'Answered from the offline knowledge base.'
+          });
+        }
         const text = data && typeof data.response === 'string' ? data.response.trim() : '';
         if (!text) {
           chatMessages.push({
@@ -120,25 +148,18 @@
             content: 'The assistant returned an empty response. Please try again.',
             error: true
           });
-          renderMessages();
-          sending = false;
-          sendBtn.disabled = false;
-          sendBtn.classList.remove('disabled');
-          return;
+        } else {
+          chatMessages.push({ role: 'assistant', content: text });
         }
-        chatMessages.push({ role: 'assistant', content: text });
         renderMessages();
-        sending = false;
-        sendBtn.disabled = false;
-        sendBtn.classList.remove('disabled');
+        finishSending();
       })
       .catch(err => {
+        if (seq !== sendSeq) return;
         console.error('Chat error:', err);
         chatMessages.push({ role: 'assistant', content: 'Error: Could not reach server', error: true });
         renderMessages();
-        sending = false;
-        sendBtn.disabled = false;
-        sendBtn.classList.remove('disabled');
+        finishSending();
       });
     }
 
@@ -155,7 +176,7 @@
 
       chatMessages.forEach((m, i) => {
         const div = document.createElement('div');
-        div.className = `message ${m.role}`;
+        div.className = `message ${m.role}` + (m.note ? ' note' : '');
         div.textContent = m.content;
         chatMessagesList.appendChild(div);
       });
@@ -169,6 +190,7 @@
     }
 
     function newChat() {
+      sendSeq++;
       chatMessages = [];
       sending = false;
       renderMessages();

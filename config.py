@@ -93,6 +93,14 @@ GEMINI_API_KEY: Optional[str] = _env("GEMINI_API_KEY") or None
 GEMINI_MODEL: str = _env("GEMINI_MODEL", "gemini-2.5-flash") or "gemini-2.5-flash"
 GEMINI_TIMEOUT: int = int(_env("GEMINI_TIMEOUT", "20") or "20")
 GEMINI_MAX_HISTORY: int = 10
+# Transient provider errors (5xx / timeout / connection) are retried at most
+# this many extra times. Kept small to avoid retry loops and duplicate billing.
+GEMINI_RETRIES: int = int(_env("GEMINI_RETRIES", "1") or "1")
+# After a provider failure, the online provider is skipped for this many
+# seconds (per process) while the user's selected mode stays ONLINE.
+PROVIDER_COOLDOWN_SECONDS: float = float(
+    _env("PROVIDER_COOLDOWN_SECONDS", "30") or "30"
+)
 
 SYSTEM_PROMPT = (
     "You are Student AI Assistant, a friendly and expert tutor for school and "

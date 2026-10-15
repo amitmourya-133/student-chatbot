@@ -8,6 +8,7 @@ raw HTTP bodies are only written to the log, never returned to the user.
 from __future__ import annotations
 
 import logging
+import time
 from typing import Iterable, Optional
 
 import requests
@@ -36,6 +37,28 @@ except Exception:  # pragma: no cover - SDK not installed
 
 class GeminiError(Exception):
     """Raised when the online model cannot produce an answer."""
+
+
+# Safe, user-facing messages for failure categories. Kept in one place so the
+# pipeline can tell a *transient* provider problem (worth a bounded retry)
+# apart from a permanent one (bad key, unknown model, bad request).
+MSG_RATE_LIMITED = "The online AI is rate limited right now."
+MSG_AUTH = "The online AI could not authenticate."
+MSG_MODEL_MISSING = "The configured online model is not available."
+MSG_PROVIDER_PROBLEM = "The online AI service is having problems."
+MSG_TIMEOUT = "The online AI timed out."
+MSG_UNREACHABLE = "Could not reach the online AI service."
+MSG_REQUEST_FAILED = "The online AI request failed."
+MSG_EMPTY = "The model returned an empty response."
+MSG_BAD_PAYLOAD = "The online AI returned an unexpected response."
+
+# Transient categories: retrying once is reasonable and cheap.
+_TRANSIENT_MESSAGES = frozenset({MSG_PROVIDER_PROBLEM, MSG_TIMEOUT, MSG_UNREACHABLE})
+
+
+def is_transient_error(exc: "GeminiError") -> bool:
+    """True when ``exc`` is likely to succeed on a single retry."""
+    return str(exc) in _TRANSIENT_MESSAGES
 
 
 def is_configured() -> bool:
@@ -68,19 +91,29 @@ def _normalise_history(
     return cleaned[-config.GEMINI_MAX_HISTORY:]
 
 
+def _message_for_status(status) -> Optional[str]:
+    """Map an HTTP status code to a safe user-facing message."""
+    if status == 404:
+        return MSG_MODEL_MISSING
+    if status == 429:
+        return MSG_RATE_LIMITED
+    if status in (400, 401, 403):
+        return MSG_AUTH
+    if isinstance(status, int) and status >= 500:
+        return MSG_PROVIDER_PROBLEM
+    return None
+
+
 def _raise_mapped_sdk_error(exc: Exception) -> None:
     """Translate SDK exceptions into safe :class:`GeminiError` messages."""
     status = getattr(exc, "code", None) or getattr(exc, "status_code", None)
-    if status == 429:
-        raise GeminiError("The online AI is rate limited right now.")
-    if status in (400, 401, 403):
-        raise GeminiError("The online AI could not authenticate.")
-    if isinstance(status, int) and status >= 500:
-        raise GeminiError("The online AI service is having problems.")
+    message = _message_for_status(status)
+    if message:
+        raise GeminiError(message)
     if "api key" in str(exc).lower():
-        raise GeminiError("The online AI could not authenticate.")
+        raise GeminiError(MSG_AUTH)
     logger.warning("Gemini SDK error: %s: %s", type(exc).__name__, exc)
-    raise GeminiError("The online AI request failed.")
+    raise GeminiError(MSG_REQUEST_FAILED)
 
 
 def _generate_via_sdk(
@@ -123,14 +156,14 @@ def _generate_via_sdk(
             _raise_mapped_sdk_error(exc)
         error_name = type(exc).__name__.lower()
         if isinstance(exc, TimeoutError) or "timeout" in error_name:
-            raise GeminiError("The online AI timed out.")
+            raise GeminiError(MSG_TIMEOUT)
         if isinstance(exc, OSError) or "connect" in error_name or "network" in error_name:
-            raise GeminiError("Could not reach the online AI service.")
+            raise GeminiError(MSG_UNREACHABLE)
         raise  # unknown failure - generate_response retries through REST
 
     text = getattr(response, "text", None)
     if not text or not str(text).strip():
-        raise GeminiError("The model returned an empty response.")
+        raise GeminiError(MSG_EMPTY)
     return str(text).strip()
 
 
@@ -165,13 +198,15 @@ def _generate_via_rest(
         timeout=config.GEMINI_TIMEOUT,
     )
     if response.status_code == 429:
-        raise GeminiError("The online AI is rate limited right now.")
+        raise GeminiError(MSG_RATE_LIMITED)
+    if response.status_code == 404:
+        raise GeminiError(MSG_MODEL_MISSING)
     if response.status_code in (400, 401, 403):
-        raise GeminiError("The online AI could not authenticate.")
+        raise GeminiError(MSG_AUTH)
     if response.status_code >= 500:
-        raise GeminiError("The online AI service is having problems.")
+        raise GeminiError(MSG_PROVIDER_PROBLEM)
     if not response.ok:
-        raise GeminiError("The online AI request failed.")
+        raise GeminiError(MSG_REQUEST_FAILED)
 
     data = response.json()
     try:
@@ -179,11 +214,40 @@ def _generate_via_rest(
         text = "".join(part.get("text", "") for part in parts)
     except (KeyError, IndexError, TypeError) as exc:
         logger.warning("Unexpected Gemini payload shape: %s", exc)
-        raise GeminiError("The online AI returned an unexpected response.")
+        raise GeminiError(MSG_BAD_PAYLOAD)
 
     if not text.strip():
-        raise GeminiError("The model returned an empty response.")
+        raise GeminiError(MSG_EMPTY)
     return text.strip()
+
+
+def _attempt_online(
+    message: str,
+    history: list[dict],
+    system_instruction: Optional[str],
+) -> str:
+    """One SDK-or-REST attempt. Raises :class:`GeminiError` on failure."""
+    if _SDK_AVAILABLE:
+        try:
+            return _generate_via_sdk(message, history, system_instruction)
+        except GeminiError:
+            raise
+        except Exception:
+            logger.exception("Unexpected Gemini SDK failure")
+
+    try:
+        return _generate_via_rest(message, history, system_instruction)
+    except GeminiError:
+        raise
+    except requests.exceptions.Timeout as exc:
+        logger.warning("Gemini timeout: %s", exc)
+        raise GeminiError(MSG_TIMEOUT)
+    except requests.exceptions.ConnectionError as exc:
+        logger.warning("Gemini connection error: %s", exc)
+        raise GeminiError(MSG_UNREACHABLE)
+    except Exception:
+        logger.exception("Unexpected Gemini failure")
+        raise GeminiError(MSG_REQUEST_FAILED)
 
 
 def generate_response(
@@ -196,6 +260,10 @@ def generate_response(
     ``system_instruction`` replaces the default ``config.SYSTEM_PROMPT`` when
     provided; ``None`` keeps the current behaviour exactly.
 
+    Transient failures (5xx, timeout, connection loss) are retried at most
+    ``config.GEMINI_RETRIES`` extra times with a short backoff; permanent
+    failures (bad key, unknown model, bad request) fail immediately.
+
     Raises :class:`GeminiError` on any failure so callers can fall back to
     the offline knowledge base.
     """
@@ -205,29 +273,25 @@ def generate_response(
         raise GeminiError("Empty message.")
 
     history = _normalise_history(conversation_history)
+    attempts = max(1, config.GEMINI_RETRIES + 1)
 
-    if _SDK_AVAILABLE:
+    last_error: Optional[GeminiError] = None
+    for attempt in range(attempts):
         try:
-            return _generate_via_sdk(
+            return _attempt_online(
                 user_message.strip(), history, system_instruction
             )
-        except GeminiError:
-            raise
-        except Exception:
-            logger.exception("Unexpected Gemini SDK failure")
+        except GeminiError as exc:
+            last_error = exc
+            if not is_transient_error(exc) or attempt == attempts - 1:
+                raise
+            logger.info(
+                "Transient Gemini failure (attempt %d/%d), retrying: %s",
+                attempt + 1,
+                attempts,
+                exc,
+            )
+            time.sleep(0.4 * (attempt + 1))
 
-    try:
-        return _generate_via_rest(
-            user_message.strip(), history, system_instruction
-        )
-    except GeminiError:
-        raise
-    except requests.exceptions.Timeout as exc:
-        logger.warning("Gemini timeout: %s", exc)
-        raise GeminiError("The online AI timed out.")
-    except requests.exceptions.ConnectionError as exc:
-        logger.warning("Gemini connection error: %s", exc)
-        raise GeminiError("Could not reach the online AI service.")
-    except Exception:
-        logger.exception("Unexpected Gemini failure")
-        raise GeminiError("The online AI failed unexpectedly.")
+    # Unreachable: the loop either returns or raises.
+    raise last_error or GeminiError(MSG_REQUEST_FAILED)

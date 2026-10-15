@@ -24,6 +24,7 @@ app.mount("/static", StaticFiles(directory=str(config.STATIC_DIR)), name="static
 
 # Global pipeline instance - offline by default
 pipeline = AssistantPipeline(force_offline=True)
+pipeline.startup()
 
 # Security
 security = HTTPBearer(auto_error=False)
@@ -52,11 +53,22 @@ def set_active_pdf(state: dict):
 # Health endpoints
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "mode": pipeline.mode}
+    return {
+        "status": "ok",
+        "mode": pipeline.mode,
+        "online": pipeline.online,
+        "provider_status": pipeline.provider_status,
+        "api_key_configured": config.has_api_key(),
+    }
 
 @app.get("/api/status")
 async def status():
-    return {"mode": pipeline.mode}
+    return {
+        "mode": pipeline.mode,
+        "online": pipeline.online,
+        "provider_status": pipeline.provider_status,
+        "api_key_configured": config.has_api_key(),
+    }
 
 # Chat endpoint
 @app.post("/api/chat")
@@ -66,11 +78,29 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=400, detail="Message must not be empty")
     try:
         response = pipeline.reply(message)
-        return {"response": response.text, "mode": pipeline.mode}
+        return {
+            "response": response.text,
+            "mode": pipeline.mode,
+            "source": response.source,
+            "online": response.online,
+            "provider_status": response.provider_status,
+            "fallback_used": response.fallback_used,
+            "error": response.error,
+            "request_id": response.request_id,
+        }
     except GeminiError as exc:
         # Safe, sanitised category only - never the raw error or API key.
         logger.warning("Chat online failure: %s", exc)
-        return {"response": "Online AI is unavailable right now. Please try again later.", "mode": "offline"}
+        return {
+            "response": "Online AI is unavailable right now. Please try again later.",
+            "mode": pipeline.mode,
+            "source": "FALLBACK",
+            "online": False,
+            "provider_status": "error",
+            "fallback_used": True,
+            "error": str(exc),
+            "request_id": "",
+        }
     except Exception:
         logger.exception("Chat endpoint failed")
         raise HTTPException(status_code=500, detail="Internal error")
@@ -185,14 +215,20 @@ async def pdf_extract():
 # Gemini mode endpoint
 @app.post("/mode/switch")
 async def mode_switch(enable_online: bool = False):
-    global pipeline
     try:
-        # Build a pipeline for the requested mode and run startup() so the
-        # online/offline decision is actually evaluated. (force_offline alone
-        # does not set the mode - refresh_mode(), called by startup(), does.)
-        pipeline = AssistantPipeline(force_offline=not enable_online)
-        pipeline.startup()
-        return {"mode": pipeline.mode, "success": True}
+        # Mutate the existing pipeline so chat history and memory survive the
+        # switch. force_offline alone does not set the mode - refresh_mode()
+        # evaluates connectivity + key.
+        pipeline.force_offline = not enable_online
+        if enable_online:
+            pipeline.reset_provider_cooldown()
+        pipeline.refresh_mode()
+        return {
+            "mode": pipeline.mode,
+            "online": pipeline.online,
+            "provider_status": pipeline.provider_status,
+            "success": True,
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Mode switch error: {str(e)}")
 

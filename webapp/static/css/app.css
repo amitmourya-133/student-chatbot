@@ -60,6 +60,7 @@ body {
 }
 .mode-indicator:hover { background: var(--bg); }
 .mode-indicator.online { color: #1a7f37; border-color: #1a7f37; }
+.mode-indicator.degraded { color: #9a6700; border-color: #9a6700; }
 .mode-indicator:disabled { opacity: .6; cursor: default; }
 
 .messages {
@@ -83,6 +84,10 @@ body {
 }
 .message.user { align-self: flex-end; background: var(--accent); color: white; }
 .message.assistant { align-self: flex-start; background: var(--card); color: var(--text); }
+.message.note {
+  align-self: flex-start; background: transparent; color: #9a6700;
+  border: 1px dashed #9a6700; font-size: .8rem; font-style: italic;
+}
 
 .composer {
   padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: var(--card);

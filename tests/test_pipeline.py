@@ -18,6 +18,7 @@ def offline_pipeline(tmp_path, monkeypatch):
     patch.write_text("[]", encoding="utf-8")
     monkeypatch.setattr(pipeline_mod.config, "CHAT_LOG_FILE", patch)
     pipe = AssistantPipeline(force_offline=True, memory_path=tmp_path / "memory.json")
+    pipe.load_intent_responses()
     return pipe
 
 
@@ -65,9 +66,14 @@ def test_gemini_error_falls_back_gracefully(offline_pipeline, monkeypatch):
     monkeypatch.setattr(pipeline_mod, "generate_response", boom)
     result = offline_pipeline.reply("question")
     assert result.online is False
-    assert result.just_switched is True
+    assert result.fallback_used is True
+    assert result.provider_status == pipeline_mod.PROVIDER_ERROR
     assert result.error == "The online AI service is having problems."
     assert result.text.strip()  # offline answer still produced
+    # The user-selected mode must be preserved, not silently flipped offline.
+    assert offline_pipeline.online is True
+    assert offline_pipeline.mode == "online"
+    assert offline_pipeline.online_disabled is True
 
 
 def test_unexpected_online_error_falls_back(offline_pipeline, monkeypatch):
@@ -79,19 +85,80 @@ def test_unexpected_online_error_falls_back(offline_pipeline, monkeypatch):
     monkeypatch.setattr(pipeline_mod, "generate_response", boom)
     result = offline_pipeline.reply("question")
     assert result.online is False
-    assert result.just_switched is True
+    assert result.fallback_used is True
+    assert result.provider_status == pipeline_mod.PROVIDER_ERROR
     assert "failed" in result.error.lower()
     assert result.text.strip()
+    assert offline_pipeline.online is True
+
+
+def test_provider_failure_enters_cooldown_not_offline(offline_pipeline, monkeypatch):
+    offline_pipeline.online = True
+    monkeypatch.setattr(
+        pipeline_mod,
+        "generate_response",
+        lambda m, h, system_instruction=None: (_ for _ in ()).throw(GeminiError("x")),
+    )
+    offline_pipeline.reply("a")
+    assert offline_pipeline.online_disabled is True
+    # Mode is unchanged; only the provider is cooling down.
+    assert offline_pipeline.online is True
+    assert offline_pipeline.provider_status == pipeline_mod.PROVIDER_ERROR
+
+
+def test_cooldown_does_not_expire_immediately(offline_pipeline, monkeypatch):
+    offline_pipeline.online = True
+    offline_pipeline._mark_provider_error("boom")
+    # Within the cooldown window the provider is skipped without retrying.
+    assert offline_pipeline.provider_status == pipeline_mod.PROVIDER_ERROR
+    assert offline_pipeline.online_disabled is True
+
+
+def test_reset_provider_cooldown_allows_retry(offline_pipeline, monkeypatch):
+    offline_pipeline.online = True
+    offline_pipeline._mark_provider_error("boom")
+    offline_pipeline.reset_provider_cooldown()
+    assert offline_pipeline.online_disabled is False
+    assert offline_pipeline.provider_status == pipeline_mod.PROVIDER_OK
+    monkeypatch.setattr(
+        pipeline_mod,
+        "generate_response",
+        lambda m, h, system_instruction=None: "recovered",
+    )
+    result = offline_pipeline.reply("hello")
+    assert result.online is True
+    assert result.source == pipeline_mod.SOURCE_GEMINI
+    assert result.text == "recovered"
 
 
 def test_online_disabled_is_latched(offline_pipeline, monkeypatch):
     offline_pipeline.online = True
     monkeypatch.setattr(
-        pipeline_mod, "generate_response", lambda m, h: (_ for _ in ()).throw(GeminiError("x"))
+        pipeline_mod,
+        "generate_response",
+        lambda m, h, system_instruction=None: (_ for _ in ()).throw(GeminiError("x")),
     )
     offline_pipeline.reply("a")
     assert offline_pipeline.online_disabled is True
-    assert offline_pipeline.online is False
+    # Latched provider cool-down while the selected mode stays online.
+    assert offline_pipeline.online is True
+
+
+def test_online_failure_no_local_answer_uses_provider_message(offline_pipeline, monkeypatch):
+    offline_pipeline.online = True
+    monkeypatch.setattr(
+        pipeline_mod,
+        "generate_response",
+        lambda m, h, system_instruction=None: (_ for _ in ()).throw(
+            GeminiError("The online AI service is having problems.")
+        ),
+    )
+    result = offline_pipeline.reply("zzqx quantum waffle 918273")
+    assert result.source == pipeline_mod.SOURCE_FALLBACK
+    assert result.fallback_used is True
+    assert result.text == pipeline_mod.PROVIDER_FALLBACK_MESSAGE
+    # The generic offline fallback template must not be shown as the answer.
+    assert "didn't quite get that" not in result.text.lower()
 
 
 def test_online_history_pairs_includes_recent(offline_pipeline, monkeypatch):
@@ -131,6 +198,13 @@ def test_startup_status_shape(offline_pipeline):
     assert status.kb_entries > 0
     assert status.online is False  # force_offline
     assert status.api_key is True or status.api_key is False
+    assert status.provider_status in (
+        pipeline_mod.PROVIDER_OFFLINE,
+        pipeline_mod.PROVIDER_OK,
+        pipeline_mod.PROVIDER_ERROR,
+        pipeline_mod.PROVIDER_UNCONFIGURED,
+        pipeline_mod.PROVIDER_UNREACHABLE,
+    )
 
 
 def test_force_offline_never_goes_online(monkeypatch):
@@ -138,6 +212,33 @@ def test_force_offline_never_goes_online(monkeypatch):
     pipe = AssistantPipeline(force_offline=True)
     pipe.refresh_mode(initial=True)
     assert pipe.online is False
+
+
+def test_reply_assigns_request_id(offline_pipeline):
+    result = offline_pipeline.reply("hello")
+    assert result.request_id
+
+
+def test_momentum_offline_answer(offline_pipeline):
+    """Regression: 'momentum kya hota hai' must give the momentum answer."""
+    for query in ("what is momentum", "momentum kya hota hai", "momentum formula"):
+        result = offline_pipeline.reply(query)
+        assert result.source == pipeline_mod.SOURCE_OFFLINE_KB, query
+        assert "m" in result.text.lower() and "v" in result.text.lower()
+        assert "programming query" not in result.text.lower()
+
+
+def test_offtopic_content_intent_is_not_answered_with_template(offline_pipeline):
+    """A content intent with no topic overlap must not emit a canned template."""
+    result = offline_pipeline.reply("kya hota hai")
+    # 'kya hota hai' is all generic words - it cannot be grounded to a topic.
+    assert result.source == pipeline_mod.SOURCE_FALLBACK
+
+
+def test_social_intent_with_generic_words_still_answers(offline_pipeline):
+    """Social intents ('kaise ho') are exempt from content grounding."""
+    result = offline_pipeline.reply("kaise ho")
+    assert result.source == pipeline_mod.SOURCE_INTENT
 
 
 def test_chat_endpoint_returns_valid_response():

@@ -218,14 +218,14 @@ class StudentChatbot:
     def get_reply(self, text: str) -> tuple[str, str]:
         """Return ``(reply, mode)`` - never raises."""
         result = self.pipeline.reply(text)
-        if result.just_switched:
+        if result.fallback_used:
+            reason = result.error or "Online AI unavailable."
             print(
                 paint(
-                    "⚠️ Online AI unavailable. Switching to offline mode.",
+                    f"⚠️ {reason} Answered from the offline knowledge base.",
                     YELLOW,
                 )
             )
-            print(self.mode_line())
         return result.text, ("online" if result.online else "offline")
 
     # ------------------------------------------------------------------ #

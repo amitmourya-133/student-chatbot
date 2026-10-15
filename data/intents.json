@@ -115,10 +115,12 @@
         "java vs python",
         "how to start coding",
         "coding kaise start karu",
-        "html kya hota hai",
-        "css kaise seekhe",
-        "javascript kya hai"
-      ],
+   "html kya hota hai",
+   "css kaise seekhe",
+   "javascript kya hai",
+   "how to add two numbers in python",
+   "write a python program to add two numbers"
+  ],
       "responses": [
         "Let's look at the code together. Ask me about Python, HTML, CSS, JavaScript or any programming concept.",
         "Programming query received. I can explain concepts, fix errors and suggest examples."
@@ -184,11 +186,18 @@
         "explain the water cycle",
         "cell kya hota hai",
         "why is sky blue",
-        "explain atom",
-        "biology padhna hai",
-        "laws of motion",
-        "what is force"
-      ],
+   "explain atom",
+   "biology padhna hai",
+   "laws of motion",
+   "what is force",
+   "what is momentum",
+   "define momentum",
+   "momentum kya hota hai",
+   "संवेग क्या होता है",
+   "conservation of momentum",
+   "explain newton's second law",
+   "newton's second law of motion"
+  ],
       "responses": [
         "Let's break the science concept down into simple parts.",
         "Science question noted. Physics, chemistry or biology - ask away!"

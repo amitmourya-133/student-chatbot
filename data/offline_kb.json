@@ -1099,6 +1099,56 @@
       "question": "What is sex?",
       "answer": "Sex refers to the biological and physiological characteristics of an individual, such as chromosomes (for example XX and XY), hormones and reproductive anatomy. In human beings, sex is typically categorised as male, female or intersex. Sex is different from gender, which is a social and cultural role, so a person's sex and gender identity are not the same thing.",
       "intent": "science"
+    },
+    {
+      "question": "What is momentum?",
+      "answer": "Momentum is the product of an object's mass and velocity: p = m × v. It is a vector quantity, so it points in the same direction as the velocity. Its SI unit is the kilogram metre per second (kg·m/s). A heavier or faster object has more momentum.",
+      "intent": "science"
+    },
+    {
+      "question": "momentum kya hota hai",
+      "answer": "Momentum (संवेग) kisi object ke mass aur velocity ka product hota hai: p = m × v. Ye ek vector quantity hai, isliye iski direction velocity ki direction ke saath hoti hai. Iski SI unit kilogram metre per second (kg·m/s) hai. Zyada mass ya zyada velocity wale object ka momentum zyada hota hai.",
+      "intent": "science"
+    },
+    {
+      "question": "Define momentum",
+      "answer": "Momentum is defined as the quantity of motion of a body, equal to the product of its mass and velocity, p = m × v. It is a vector quantity with SI unit kg·m/s, and Newton's second law (F = Δp/Δt) describes how force changes momentum.",
+      "intent": "science"
+    },
+    {
+      "question": "What is the formula for momentum?",
+      "answer": "The formula for momentum is p = m × v, where p = momentum, m = mass (kg) and v = velocity (m/s). Example: a 2 kg object moving at 3 m/s has momentum p = 2 × 3 = 6 kg·m/s.",
+      "intent": "science"
+    },
+    {
+      "question": "momentum formula",
+      "answer": "Momentum ka formula p = m × v hai, jahan p = momentum, m = mass (kg) aur v = velocity (m/s) hai. Example: 2 kg object jo 3 m/s se chal raha hai, uska momentum p = 2 × 3 = 6 kg·m/s hota hai.",
+      "intent": "science"
+    },
+    {
+      "question": "संवेग क्या होता है",
+      "answer": "संवेग (momentum) किसी वस्तु के द्रव्यमान और वेग का गुणनफल होता है: p = m × v. यह एक सदिश राशि है, इसलिए इसकी दिशा वेग की दिशा में होती है। इसका SI मात्रक किलोग्राम मीटर प्रति सेकंड (kg·m/s) है।",
+      "intent": "science"
+    },
+    {
+      "question": "What is conservation of momentum?",
+      "answer": "The law of conservation of momentum states that in an isolated system (no external force) the total momentum stays constant. In collisions, total momentum before equals total momentum after: m1u1 + m2u2 = m1v1 + m2v2.",
+      "intent": "science"
+    },
+    {
+      "question": "Explain Newton's second law",
+      "answer": "Newton's second law states that the net force on an object equals its mass times its acceleration: F = m·a, equivalently F = Δp/Δt (the rate of change of momentum). Doubling the force doubles the acceleration; doubling the mass halves the acceleration for the same force.",
+      "intent": "science"
+    },
+    {
+      "question": "Write a Python program to add two numbers",
+      "answer": "Here is a simple Python program to add two numbers:\n\n```python\na = int(input(\"Enter first number: \"))\nb = int(input(\"Enter second number: \"))\nprint(\"Sum =\", a + b)\n```\n\n`input()` reads text, so wrap it with `int()` (or `float()`) to convert to a number before adding.",
+      "intent": "code"
+    },
+    {
+      "question": "How do I add two numbers in Python?",
+      "answer": "In Python you add two numbers with the `+` operator:\n\n```python\na = int(input(\"Enter first number: \"))\nb = int(input(\"Enter second number: \"))\nprint(a + b)\n```\n\nFor decimal values use `float()` instead of `int()`.",
+      "intent": "code"
     }
   ]
 }

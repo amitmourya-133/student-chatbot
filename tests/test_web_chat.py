@@ -68,6 +68,35 @@ def test_health_endpoint():
     assert res.json()["status"] == "ok"
 
 
+def test_status_endpoint_reports_provider_status():
+    res = client.get("/api/status")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["mode"] in ("online", "offline")
+    assert "online" in data
+    assert "provider_status" in data
+    assert "api_key_configured" in data
+
+
+def test_chat_response_includes_source_and_provider():
+    res = client.post("/api/chat", json={"message": "hello"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["source"] in (
+        "OFFLINE_KB",
+        "INTENT_MODEL",
+        "GEMINI",
+        "FALLBACK",
+        "MEMORY",
+        "DOCUMENT",
+        "HYBRID",
+    )
+    assert isinstance(data["online"], bool)
+    assert data["provider_status"]
+    assert "fallback_used" in data
+    assert "request_id" in data
+
+
 def test_index_page_served():
     res = client.get("/")
     assert res.status_code == 200
