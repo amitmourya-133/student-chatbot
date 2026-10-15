@@ -1,0 +1,29 @@
+# Never upload secrets
+.env
+.env.*
+!.env.example
+
+# Local build outputs / packaging
+build/
+dist/
+*.spec
+*.bak
+
+# Local verification reports
+reports/
+
+# Tests, harnesses and dev-only tooling
+tests/
+scripts/
+
+# Caches / logs / user data
+**/__pycache__/
+*.pyc
+.pytest_cache/
+logs/
+data/memory.json
+data/chat_log.json
+data/web_launcher.port
+
+# VCS metadata
+.git/
