@@ -90,12 +90,22 @@ DOCUMENT_CHUNK_OVERLAP = 200
 # Gemini / Online mode
 # --------------------------------------------------------------------------- #
 GEMINI_API_KEY: Optional[str] = _env("GEMINI_API_KEY") or None
-GEMINI_MODEL: str = _env("GEMINI_MODEL", "gemini-2.5-flash") or "gemini-2.5-flash"
+# Safe default model. ``gemini-2.5-flash`` was retired for new users (404) and
+# ``gemini-3.8-flash`` intermittently returns 503 UNAVAILABLE (overload).
+# ``gemini-3.5-flash`` is a current, generally-available Flash model suitable
+# for a student assistant. Always overridable via the GEMINI_MODEL env var.
+GEMINI_MODEL: str = _env("GEMINI_MODEL", "gemini-3.5-flash") or "gemini-3.5-flash"
 GEMINI_TIMEOUT: int = int(_env("GEMINI_TIMEOUT", "20") or "20")
 GEMINI_MAX_HISTORY: int = 10
-# Transient provider errors (5xx / timeout / connection) are retried at most
-# this many extra times. Kept small to avoid retry loops and duplicate billing.
+# Transient provider errors (429 rate limit, 408, 5xx, timeout, connection) are
+# retried at most this many extra times. Kept small to avoid retry loops and
+# duplicate billing.
 GEMINI_RETRIES: int = int(_env("GEMINI_RETRIES", "1") or "1")
+# Exponential backoff with jitter between retries. ``GEMINI_MAX_BACKOFF`` bounds
+# each wait (and caps any provider ``Retry-After``) so a single request stays
+# well within the 20s request timeout and Vercel's function time budget.
+GEMINI_BACKOFF_BASE: float = float(_env("GEMINI_BACKOFF_BASE", "0.5") or "0.5")
+GEMINI_MAX_BACKOFF: float = float(_env("GEMINI_MAX_BACKOFF", "4") or "4")
 # After a provider failure, the online provider is skipped for this many
 # seconds (per process) while the user's selected mode stays ONLINE.
 PROVIDER_COOLDOWN_SECONDS: float = float(

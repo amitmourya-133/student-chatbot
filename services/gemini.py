@@ -8,6 +8,8 @@ raw HTTP bodies are only written to the log, never returned to the user.
 from __future__ import annotations
 
 import logging
+import random
+import re
 import time
 from typing import Iterable, Optional
 
@@ -36,7 +38,22 @@ except Exception:  # pragma: no cover - SDK not installed
 
 
 class GeminiError(Exception):
-    """Raised when the online model cannot produce an answer."""
+    """Raised when the online model cannot produce an answer.
+
+    ``status`` carries the provider HTTP status when known and ``retry_after``
+    the provider-requested delay in seconds (from ``Retry-After`` or the
+    ``RetryInfo.retryDelay`` detail). Neither ever contains credentials.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        status: Optional[int] = None,
+        retry_after: Optional[float] = None,
+    ) -> None:
+        super().__init__(message)
+        self.status = status
+        self.retry_after = retry_after
 
 
 # Safe, user-facing messages for failure categories. Kept in one place so the
@@ -52,13 +69,45 @@ MSG_REQUEST_FAILED = "The online AI request failed."
 MSG_EMPTY = "The model returned an empty response."
 MSG_BAD_PAYLOAD = "The online AI returned an unexpected response."
 
-# Transient categories: retrying once is reasonable and cheap.
-_TRANSIENT_MESSAGES = frozenset({MSG_PROVIDER_PROBLEM, MSG_TIMEOUT, MSG_UNREACHABLE})
+# Transient HTTP statuses worth a bounded retry: rate limits, request timeout,
+# server errors and gateway errors. 400/401/403/404 are permanent.
+_TRANSIENT_STATUSES = frozenset({408, 429, 500, 502, 503, 504})
+
+# Transient categories: retrying is reasonable and cheap. Message-based
+# fallback for errors raised without a status (e.g. timeouts, connection loss).
+_TRANSIENT_MESSAGES = frozenset(
+    {MSG_PROVIDER_PROBLEM, MSG_TIMEOUT, MSG_UNREACHABLE, MSG_RATE_LIMITED}
+)
 
 
 def is_transient_error(exc: "GeminiError") -> bool:
-    """True when ``exc`` is likely to succeed on a single retry."""
+    """True when ``exc`` is worth a single bounded retry.
+
+    Prefers the provider HTTP status when present; otherwise falls back to the
+    safe message category. Authentication, access and unknown-model errors are
+    never transient.
+    """
+    status = getattr(exc, "status", None)
+    if isinstance(status, int):
+        return status in _TRANSIENT_STATUSES
     return str(exc) in _TRANSIENT_MESSAGES
+
+
+def parse_retry_after(value: object) -> Optional[float]:
+    """Parse a ``Retry-After`` header / ``retryDelay`` value into seconds.
+
+    Accepts seconds (``"5"``) and durations (``"5s"``, ``"1.5s"``); returns
+    ``None`` for missing/HTTP-date values (which we do not need here)."""
+    if value is None:
+        return None
+    text = str(value).strip().lower().rstrip("s")
+    try:
+        seconds = float(text)
+    except (TypeError, ValueError):
+        return None
+    if seconds < 0:
+        return None
+    return seconds
 
 
 def is_configured() -> bool:
@@ -104,16 +153,29 @@ def _message_for_status(status) -> Optional[str]:
     return None
 
 
+def _sdk_retry_after(exc: Exception) -> Optional[float]:
+    """Best-effort extraction of a provider retry delay from an SDK error."""
+    for attr in ("retry_after", "retry_delay", "retryDelay"):
+        parsed = parse_retry_after(getattr(exc, attr, None))
+        if parsed is not None:
+            return parsed
+    match = re.search(r"retryDelay['\"]?\s*[:=]\s*['\"]?([0-9.]+)s", str(exc))
+    if match:
+        return parse_retry_after(match.group(1))
+    return None
+
+
 def _raise_mapped_sdk_error(exc: Exception) -> None:
     """Translate SDK exceptions into safe :class:`GeminiError` messages."""
-    status = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+    raw_status = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+    status = raw_status if isinstance(raw_status, int) else None
     message = _message_for_status(status)
     if message:
-        raise GeminiError(message)
+        raise GeminiError(message, status=status, retry_after=_sdk_retry_after(exc))
     if "api key" in str(exc).lower():
-        raise GeminiError(MSG_AUTH)
+        raise GeminiError(MSG_AUTH, status=status)
     logger.warning("Gemini SDK error: %s: %s", type(exc).__name__, exc)
-    raise GeminiError(MSG_REQUEST_FAILED)
+    raise GeminiError(MSG_REQUEST_FAILED, status=status)
 
 
 def _generate_via_sdk(
@@ -167,6 +229,30 @@ def _generate_via_sdk(
     return str(text).strip()
 
 
+def _rest_error(response: "requests.Response") -> GeminiError:
+    """Build a safe :class:`GeminiError` from a non-OK REST response."""
+    status = response.status_code
+    retry_after = parse_retry_after(response.headers.get("Retry-After"))
+    if retry_after is None:
+        retry_after = _rest_retry_delay(response)
+    message = _message_for_status(status)
+    if message is None:
+        return GeminiError(MSG_REQUEST_FAILED, status=status, retry_after=retry_after)
+    return GeminiError(message, status=status, retry_after=retry_after)
+
+
+def _rest_retry_delay(response: "requests.Response") -> Optional[float]:
+    """Read ``RetryInfo.retryDelay`` from a JSON error body when present."""
+    try:
+        details = response.json().get("error", {}).get("details", []) or []
+    except Exception:
+        return None
+    for item in details:
+        if isinstance(item, dict) and "RetryInfo" in str(item.get("@type", "")):
+            return parse_retry_after(item.get("retryDelay"))
+    return None
+
+
 def _generate_via_rest(
     message: str,
     history: list[dict],
@@ -197,16 +283,8 @@ def _generate_via_rest(
         json=payload,
         timeout=config.GEMINI_TIMEOUT,
     )
-    if response.status_code == 429:
-        raise GeminiError(MSG_RATE_LIMITED)
-    if response.status_code == 404:
-        raise GeminiError(MSG_MODEL_MISSING)
-    if response.status_code in (400, 401, 403):
-        raise GeminiError(MSG_AUTH)
-    if response.status_code >= 500:
-        raise GeminiError(MSG_PROVIDER_PROBLEM)
     if not response.ok:
-        raise GeminiError(MSG_REQUEST_FAILED)
+        raise _rest_error(response)
 
     data = response.json()
     try:
@@ -250,6 +328,21 @@ def _attempt_online(
         raise GeminiError(MSG_REQUEST_FAILED)
 
 
+def _retry_delay(attempt: int, error: GeminiError) -> float:
+    """Exponential backoff with jitter, honoring a capped provider delay.
+
+    The wait is bounded by ``config.GEMINI_MAX_BACKOFF`` so a single message
+    stays within the request timeout and Vercel's function time budget.
+    """
+    base = max(0.0, config.GEMINI_BACKOFF_BASE)
+    cap = max(base, config.GEMINI_MAX_BACKOFF)
+    delay = min(base * (2 ** attempt), cap)
+    if error.retry_after is not None:
+        delay = max(delay, min(error.retry_after, cap))
+    jitter = random.uniform(0, delay * 0.25)
+    return min(delay + jitter, cap)
+
+
 def generate_response(
     user_message: str,
     conversation_history: Optional[Iterable[dict]] = None,
@@ -260,9 +353,10 @@ def generate_response(
     ``system_instruction`` replaces the default ``config.SYSTEM_PROMPT`` when
     provided; ``None`` keeps the current behaviour exactly.
 
-    Transient failures (5xx, timeout, connection loss) are retried at most
-    ``config.GEMINI_RETRIES`` extra times with a short backoff; permanent
-    failures (bad key, unknown model, bad request) fail immediately.
+    Transient failures (429 rate limit, 408, 5xx, timeout, connection loss) are
+    retried at most ``config.GEMINI_RETRIES`` extra times with exponential
+    backoff plus jitter, honoring a bounded ``Retry-After``. Permanent failures
+    (bad key, unknown model, bad request) fail immediately.
 
     Raises :class:`GeminiError` on any failure so callers can fall back to
     the offline knowledge base.
@@ -285,13 +379,17 @@ def generate_response(
             last_error = exc
             if not is_transient_error(exc) or attempt == attempts - 1:
                 raise
+            delay = _retry_delay(attempt, exc)
             logger.info(
-                "Transient Gemini failure (attempt %d/%d), retrying: %s",
+                "Transient Gemini failure (attempt %d/%d, status=%s), "
+                "retrying in %.2fs: %s",
                 attempt + 1,
                 attempts,
+                exc.status,
+                delay,
                 exc,
             )
-            time.sleep(0.4 * (attempt + 1))
+            time.sleep(delay)
 
     # Unreachable: the loop either returns or raises.
     raise last_error or GeminiError(MSG_REQUEST_FAILED)
