@@ -161,6 +161,24 @@ def test_online_failure_no_local_answer_uses_provider_message(offline_pipeline, 
     assert "didn't quite get that" not in result.text.lower()
 
 
+def test_rate_limited_falls_back_without_losing_online_mode(offline_pipeline, monkeypatch):
+    """A 429 rate-limit falls back locally and keeps the selected online mode."""
+    offline_pipeline.online = True
+
+    def rate_limited(msg, hist, system_instruction=None):
+        raise GeminiError("The online AI is rate limited right now.", status=429)
+
+    monkeypatch.setattr(pipeline_mod, "generate_response", rate_limited)
+    result = offline_pipeline.reply("what is momentum")
+    # Provider failure must fall back to a *local* source, never GEMINI.
+    assert result.source == pipeline_mod.SOURCE_OFFLINE_KB
+    assert result.online is False
+    assert result.fallback_used is True
+    assert result.provider_status == pipeline_mod.PROVIDER_ERROR
+    # Selected mode stays online for the next attempt.
+    assert offline_pipeline.mode == "online"
+
+
 def test_online_history_pairs_includes_recent(offline_pipeline, monkeypatch):
     captured = {}
 
